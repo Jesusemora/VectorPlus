@@ -1,46 +1,13 @@
 #ifndef __VECTOR_PLUS_H_INCLUDED__
 #define __VECTOR_PLUS_H_INCLUDED__
 
-//#include "Math/MatrixTools.h"
+#include <SOIL/SOIL.h>
 #include <string>
 #include <cmath>
 #include <vector>
 
 const double PI = 3.141592653589793;
 const double radian = PI / 180;
-
-/*template <typename T>
-class Property {
-public:
-	virtual ~Property() {}
-	virtual T& operator= (constT& f) { return value = f; }
-	virtual const T& operator() () const { return value; }
-	virtual explicit operator const T& () const { return value; }
-	virtual T* operator->() { return &value; }
-protected:
-	T value;
-};
-
-class : public Property<float> {
-	virtual float & operator = (const float &f) { return value = f;}
-	virtual operator float const & () const { return value; }
-} y;*/
-
-/*class Test {
-public:
-	Property<int, Test> Number{this, &Test::setNumber, &Test::getNumber};
-private:
-	int itsNumber;
-	void setNumber(int theNumber)
-	{
-		itsNumber = theNumber;
-	}
-	
-	int getNumber() const
-	{
-		return itsNumber;
-	}
-};*/
 
 /*
 	+ - * / %
@@ -65,10 +32,6 @@ protected:
 	
 	//get set x
 public:
-	//Property<float> x;
-	
-	//class : public Property<float> { friend class Owner; } x;
-	//Owner() { x.value = 8; }
 	
 	float &x = this->pos[0];
 	float &y = this->pos[1];
@@ -244,10 +207,6 @@ protected:
 	
 	//get set x
 public:
-	//Property<float> x;
-	
-	//class : public Property<float> { friend class Owner; } x;
-	//Owner() { x.value = 8; }
 	
 	float &x = this->pos[0];
 	float &y = this->pos[1];
@@ -805,6 +764,28 @@ public:
 		return res;
 	}
 	
+	//TODO encapsulate
+	void mulMatrix(const Matrix4x4 &obj)
+	{
+		Matrix4x4 res;
+		for(int i = 0; i < 4; i++)
+		{
+			for(int j = 0; j < 4; j++)
+			{
+				res.pos[i].pos[j] = 0;
+				for(int k = 0; k < 4; k++)
+				{
+					res.pos[i].pos[j] += this->pos[i][k] * obj[k][j];
+				}
+			}
+		}
+		
+		this->x = res.x;
+		this->y = res.y;
+		this->z = res.z;
+		this->w = res.w;
+	}
+	
 	Vector4 operator*(Vector4 const& obj)
 	{
 		Vector4 res;
@@ -889,7 +870,7 @@ public:
 		return Trl;
 	}
 	
-	static Matrix4x4 Translation(Vector3 &translation)
+	static Matrix4x4 Translation(const Vector3 &translation)
 	{
 		Matrix4x4 Trl;
 		Trl.w.x += translation.x;
@@ -901,18 +882,14 @@ public:
 	
 	void Translate(float mx, float my, float mz)
 	{
-		this->x.w += mx;
-		this->y.w += my;
-		this->z.w += mz;
-		//this->w.w = 1;//?
+		Matrix4x4 mat = Matrix4x4::Translation(mx, my, mz);
+		this->mulMatrix(mat);
 	}
 	
 	void Translate(const Vector3 &translation)
 	{
-		this->x.w += translation.x;
-		this->y.w += translation.y;
-		this->z.w += translation.z;
-		//this->w.w = 1;//?
+		Matrix4x4 mat = Matrix4x4::Translation(translation);
+		this->mulMatrix(mat);
 	}
 	
 	void toArray(float (&obj)[4][4])
