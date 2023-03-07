@@ -9,6 +9,8 @@
 const double PI = 3.141592653589793;
 const double radian = PI / 180;
 
+const float TOLERANCE = 0.00001f;
+
 /*
 	+ - * / %
 	+ - ++ --
@@ -203,10 +205,9 @@ public:
 class Vector3
 {
 protected:
-	float pos[3] = {0.0, 0.0, 0.0};//replace with 4x4
-	
 	//get set x
 public:
+	float pos[3] = {0.0, 0.0, 0.0};//replace with 4x4
 	
 	float &x = this->pos[0];
 	float &y = this->pos[1];
@@ -385,6 +386,12 @@ public:
 	{
 		return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 	}
+	
+	static Vector3 Cross(Vector3 a, Vector3 b)
+	{
+		return Vector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+	}
+	
 	//lerp
 	//
 	
@@ -585,6 +592,16 @@ public:
 		w = obj[3];
 	}
 	
+	//return Vector4
+	Vector4 operator=(const Vector3 & obj)
+	{
+		this->x = obj.x;
+		this->y = obj.y;
+		this->z = obj.z;
+		//this->w = 1;
+		return *this;
+	}
+	
 	void toArray(float (&obj)[4])
 	{
 		obj[0] = this->x;
@@ -610,7 +627,20 @@ public:
 		this->x = this->x / mag;
 		this->y = this->y / mag;
 		this->z = this->z / mag;
-		//this->z = this->z / mag;
+		this->w = this->w / mag;
+	}
+	
+	void QNormalize()
+	{
+		float mag2 = this->Magnitude();
+		if(fabs(mag2 - 1.0f) > TOLERANCE)
+		{
+			float mag = std::sqrt(mag2);
+			this->w /= mag;
+			this->x /= mag;
+			this->y /= mag;
+			this->z /= mag;
+		}
 	}
 	
 	Vector4 normalized()
@@ -647,7 +677,7 @@ public:
 		return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
 	}
 	
-	/*static float Cross(Vector4 a, Vector4 b)
+	/*static Vector4 Cross(Vector4 a, Vector4 b)
 	{
 		return Vector4(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 	}*/
@@ -764,6 +794,24 @@ public:
 		return res;
 	}
 	
+	Matrix4x4 operator*(float (&obj)[4][4])
+	{
+		Matrix4x4 res;
+		for(int i = 0; i < 4; i++)
+		{
+			for(int j = 0; j < 4; j++)
+			{
+				res.pos[i].pos[j] = 0;
+				for(int k = 0; k < 4; k++)
+				{
+					res.pos[i].pos[j] += this->pos[i][k] * obj[k][j];
+				}
+			}
+		}
+		
+		return res;
+	}
+	
 	//TODO encapsulate
 	void mulMatrix(const Matrix4x4 &obj)
 	{
@@ -860,6 +908,112 @@ public:
 		return Matrix4x4::Euler(phi * PI, theta * PI, psi * PI);
 	}
 	
+	static Matrix4x4 QuaternionRotation(Vector4 quato)
+	{
+		quato.QNormalize();
+		//2 * ((quato.x * quato.x) + (quato.y * quato.y)) - 1
+		//1 - ((2 * (quato.y * quato.y)) - (2 * (quato.z * quato.z)))
+		Matrix4x4 qRotation(Vector4(
+			2 * (quato.x * quato.x + quato.y * quato.y) - 1, 
+			2 * (quato.y * quato.z - quato.x * quato.w),
+			2 * (quato.y * quato.w + quato.x * quato.z), 0), 
+							Vector4(
+			2 * (quato.y * quato.z + quato.x * quato.w),
+			2 * (quato.x * quato.x + quato.z * quato.z) - 1,
+			2 * (quato.z * quato.w - quato.x * quato.y), 0), 
+							Vector4(
+			2 * (quato.y * quato.w - quato.x * quato.z),
+			2 * (quato.z * quato.w + quato.x * quato.y), 
+			2 * (quato.x * quato.x + quato.w * quato.w) - 1, 0), 
+							Vector4(
+			0, 
+			0, 
+			0, 
+			1));
+		return qRotation;
+	}
+	
+	static Matrix4x4 QuaternionRotation(float i, float j, float k, float L)
+	{
+		return QuaternionRotation(Vector4(i, j, k, L));
+		/*Matrix4x4 qRotation(Vector4(
+			2 * (i * i + j * j) - 1, 
+			2 * (j * k - i * L),
+			2 * (j * L + i * k), 0), 
+							Vector4(
+			2 * (j * k + i * L),
+			2 * (i * i + k * k) - 1,
+			2 * (k * L - i * j), 0), 
+							Vector4(
+			2 * (j * L - i * k),
+			2 * (k * L + i * j), 
+			2 * (i * i + L * L) - 1, 0), 
+							Vector4(
+			0, 
+			0, 
+			0, 
+			1));
+		return qRotation;*/
+	}
+	
+	static Matrix4x4 QuaternionRotation(Vector3 quato)
+	{
+		return QuaternionRotation(QuaternionEuler(quato));
+	}
+	static Matrix4x4 QuaternionRotation(float rx, float ry, float rz)
+	{
+		return QuaternionRotation(Vector3(rx, ry, rz));
+	}
+	
+	/*static Matrix4x4 QuaternionEuler(Vector3 quato)
+	{
+		
+		Matrix4x4 qRotation = QuaternionRotation();
+	}*/
+	
+	static Vector4 QuaternionEuler(Vector3 quato)
+	{
+		float qx = quato.x / 2;//i'm afraid to bitwise shift because these are floats that might be negative
+		float qy = quato.y / 2;
+		float qz = quato.z / 2;
+		
+		float qsinx = std::sin(qx);
+		float qcosx = std::cos(qx);
+		
+		float qsiny = std::sin(qy);
+		float qcosy = std::cos(qy);
+		
+		float qsinz = std::sin(qz);
+		float qcosz = std::cos(qz);
+		
+		float qcosXY = qcosx * qcosy;//can't make it more efficient than this
+		//are these too many variables?
+		
+		Vector4 Yrotation(qsinx * qcosy * qcosz, qcosx * qsiny * qcosz, qcosXY * qsinz, qcosXY * qcosz);
+		
+		return Yrotation;
+	}
+	
+	//Euler 3 fields
+	void Rotate(float &phi, float &theta, float &psi)
+	{
+		Matrix4x4 Yrotation = EulerRotation(phi, theta, psi);
+		this->mulMatrix(Yrotation);
+	}
+	
+	void Rotate(Vector3 &AvadaKadabra)
+	{
+		Matrix4x4 Yrotation = EulerRotation(AvadaKadabra.x, AvadaKadabra.y, AvadaKadabra.z);
+		this->mulMatrix(Yrotation);
+	}
+	//Quaternion 4 fields
+	
+	void Rotate(Vector4 &quato)
+	{
+		
+	}
+	
+	//Get translation
 	static Matrix4x4 Translation(float mx, float my, float mz)
 	{
 		Matrix4x4 Trl;
@@ -880,6 +1034,57 @@ public:
 		return Trl;
 	}
 	
+	//Get scale matrix
+	static Matrix4x4 Scalation(const Vector3 &scalation)
+	{
+		Matrix4x4 Trl;
+		Trl.x.x = scalation.x;
+		Trl.y.y = scalation.y;
+		Trl.z.z = scalation.z;
+		return Trl;
+	}
+	
+	static Matrix4x4 Scalation(const float &scalation)
+	{
+		Matrix4x4 Trl;
+		Trl.x.x = scalation;
+		Trl.y.y = scalation;
+		Trl.z.z = scalation;
+		return Trl;
+	}
+	
+	static Matrix4x4 Scalation(float sx, float sy, float sz)
+	{
+		Matrix4x4 Trl;
+		Trl.x.x = sx;
+		Trl.y.y = sy;
+		Trl.z.z = sz;
+		return Trl;
+	}
+	
+	//SCALE SHOULD BE DONE FIRST SO THIS IS USELESS
+	//Scale with individual floats
+	void Scale(float sx, float sy, float sz)
+	{
+		Matrix4x4 mat = Matrix4x4::Scalation(sx, sy, sz);
+		this->mulMatrix(mat);
+	}
+	
+	//Scale with a vector
+	void Scale(const Vector3 &scalation)
+	{
+		Matrix4x4 mat = Matrix4x4::Scalation(scalation);
+		this->mulMatrix(mat);
+	}
+	
+	//Scale with a single float
+	void Scale(const float &scalation)
+	{
+		Matrix4x4 mat = Matrix4x4::Scalation(scalation);
+		this->mulMatrix(mat);
+	}
+	
+	//translate this matrix
 	void Translate(float mx, float my, float mz)
 	{
 		Matrix4x4 mat = Matrix4x4::Translation(mx, my, mz);
@@ -892,6 +1097,7 @@ public:
 		this->mulMatrix(mat);
 	}
 	
+	//Get 4x4 float array
 	void toArray(float (&obj)[4][4])
 	{
 		obj[0][0] = this->x.x;
@@ -915,6 +1121,7 @@ public:
 		obj[3][3] = this->w.w;
 	}
 	
+	//get Perspective matrix
 	static Matrix4x4 Perspective(float FOV, float near, float far)
 	{
 		Matrix4x4 Mat;
@@ -959,10 +1166,36 @@ public:
 		return Mat;
 	}
 	
+	//get identity matrix (default)
 	static Matrix4x4 getIdentityMatrix()
 	{
 		Matrix4x4 mat;
 		return mat;
+	}
+	
+	static Matrix4x4 LookAt(Vector3 position, Vector3 target, Vector3 upDirection)
+	{
+		Matrix4x4 lookMatrix;
+		
+		Vector3 Zdirection = (position - target).normalized();
+		Vector3 rightV = Vector3::Cross(upDirection, Zdirection);
+		Vector3 upV = Vector3::Cross(Zdirection, rightV);
+		
+		lookMatrix.x = rightV;
+		lookMatrix.y = upV;
+		lookMatrix.z = Zdirection;
+		lookMatrix.mulMatrix(Matrix4x4::Translation(position));
+		
+		return lookMatrix;
+	}
+	
+	static Vector4 Direction(float (&Mat)[4][4])
+	{
+		//get direction from Matrix4x4
+		Matrix4x4 Irotation(Mat);
+		Vector4 res(0, 0, 1, 1);
+		//Z positive
+		return (Irotation * res);
 	}
 	
 	/*~Matrix4x4()
@@ -1012,8 +1245,21 @@ public:
 		}
 	}
 	
+	void SwapTexture(int id, GLuint *textureID)
+	{
+		if(imageO)
+		{
+			glActiveTexture(GL_TEXTURE0 + id);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this->height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->imageO);
+			glGenerateMipmap(GL_TEXTURE_2D);//TODO image is in CPU memory AND GPU memory (in theory)
+			//we need a way to send ALL of the texture data into GPU memory and keep it there until program ends
+		}
+	}
+	
 	~Texture()
 	{
+		//glActiveTexture(GL_TEXTURE0);
+		//delete textures
 		free(imageO);
 	}
 };
