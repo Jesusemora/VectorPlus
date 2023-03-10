@@ -120,7 +120,9 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector3` fill
 
 `float Dot(Vector3 a, Vector3 b)` returns the dot product of a and b
 
-`Vector2 Lerp(Vector3 a, Vector3 b)` returns the middle point between a and b, equivalent to glsl mix(a, b, 0.5) or cg lerp(a, b, 0.5)
+`Vector3 Cross(Vector3 a, Vector3 b)` returns the cross product of a and b
+
+`Vector3 Lerp(Vector3 a, Vector3 b)` returns the middle point between a and b, equivalent to glsl mix(a, b, 0.5) or cg lerp(a, b, 0.5)
 
 #### constructors
 
@@ -153,7 +155,199 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector3` fill
 `operator==` returns `true` if two Vector3s are equal and `false` if they are different
 
 ### Vector4
+
+#### Variables
+
+`float pos[4]` naked array containing the values of Vector4
+
+`float &x` reference to the first  element of `pos[]`. can be used as `myVector4.x`.
+
+`float &y` reference to the second element of `pos[]`. can be used as `myVector4.y`.
+
+`float &z` reference to the third  element of `pos[]`. can be used as `myVector4.z`.
+
+`float &w` reference to the fourth element of `pos[]`. can be used as `myVector4.w`.
+
+#### public methods
+
+`void toArray(float (&obj)[4])` fills a float array of size 4 `obj` with the values of the current `Vector4`
+
+`float Magnitude()` returns non sqr magnitude of current `Vector4`
+
+`float sqrMagnitude()` returns sqr magnitude of current `Vector4`
+
+`void Normalize()` normalizes current `Vector4`
+
+`void QNormalize()` normalizes current `Vector4` treating it as a quaternion
+
+`Vector3 normalized` returns the normalized version of current `Vector3`
+
+#### static variables
+
+```
+Vector3 up, down, left, right, forward, back, zero
+```
+
+use these to quickly obtain a "vector" in a given direction, or a `Vector3` filled with 0
+
+#### static methods
+
+`float fastDistance(Vector4 a, Vector4 b)` returns the distance between a and b in a tiled space ( like chess ). *probably useless since it measures in 4 dimensions*
+
+`float Distance(Vector4 a, Vector4 b)` returns the exact distance between a and b. *probably useless since it measures in 4 dimensions*
+
+`float Dot(Vector4 a, Vector4 b)` returns the dot product of a and b
+
+#### constructors
+
+`Vector4(float x, float y, float z, float w)` generates a `Vector4` containing the values `x`, `y`, `z` and `w`.
+
+`Vector4` generates a `Vector4` filled with (0, 0, 0, 1) wihtout parameters
+
+`Vector4(float (&obj)[4])` initializes `Vector4` from an array of `float` of size 4
+
+#### operators
+
+`operator+` adds two `Vector4`s
+
+`operator-` substracts two `Vector4`s
+
+`operator+=` adds the values of `Vector4` to current
+
+`operator-=` substracts the values of `Vector4` from current
+
+`operator*` multiplies current `Vector4` by a `float`
+
+`operator/` divides current `Vector4` by a `float`
+
+`operator+` adds `float` to every value of current `Vector4`
+
+`operator-` substracts `float` from every value of current `Vector4`
+
+`operator*=` multiplies every value of current Vector4 by `float`
+
+`operator/=` divides every value of current `Vector4` by `float`
+
+`operator==` returns `true` if two Vector4s are equal and `false` if they are different
+
+`operator=` assigns a `Vector4` *or* array of `float` of size 4 *or* `Vector3` to the current Vector4
+
+`operator[i]` returns the value at position `i`. *read only*
+
 ### Matrix4x4
+
+#### Variables
+
+`Vector4 pos[4]` naked array containing the values of Matrix4x4.the values are stored as an array of Vector4, so it is posible to do MyMatrix.x.x to access individual elements of the matrix or MyMatrix.x to access a Vector4. *this is mostly used internally, use x y z w whenever posible*
+
+`Vector4 &x` reference to the first  element of `pos[]`. can be used as `myVector4.x`.
+
+`Vector4 &y` reference to the second element of `pos[]`. can be used as `myVector4.y`.
+
+`Vector4 &z` reference to the third  element of `pos[]`. can be used as `myVector4.z`.
+
+`Vector4 &w` reference to the fourth element of `pos[]`. can be used as `myVector4.w`.
+
+#### public methods
+
+`void mulMatrix(Matrix4x4 obj)` multiplies the current `Matrix4x4` by the `Matrix4x4` obj, performing matrix multiplication. this function adds the values to the current `Matrix4x4`.
+
+`void toArray(float (&obj)[4][4])` fills a float matrix of size `[4][4]` `obj` with the values of the current `Matrix4x4`
+
+`void Rotate(float phi, float theta, float psi)` rotates current `Matrix4x4` using euler axes, in ranges between -1 and 1
+
+`void Rotate(Vector3 euler)` rotates current `Matrix4x4` using euler axes, in ranges between -1 and 1
+
+`void Rotate(Vector4 quaternion)` rotates current `Matrix4x4` using a quaternion. *currently does nothing. work in progress*
+
+`void Translate(Vector3 translation)` translates the current `Matrix4x4` in the directions given by `Vector3`
+
+`void Translate(float x, float y, float z)` translates the current `Matrix4x4` in the directions **x**, **y** and **z**
+
+#### static variables
+
+```
+Matrix4x4 Identity
+```
+
+a `Matrix4x4` containing an identity matrix.
+
+#### static methods
+
+`Matrix4x4 Euler(float phi, float theta, float psi)` generates and returns a `Matrix4x4` given euler rotation in axes **x**, **y** and **z**
+
+`Matrix4x4 EulerRotation(float x, float y, float z)` generates and returns a `Matrix4x4` given euler rotation in axes **x**, **y** and **z**, but using values between -1 and 1 for rotation
+
+`Matrix4x4 QuaternionRotation(Vector4 quaternion)` converts the Quaternion quaternion into a `Matrix4x4` for use in opengl.
+
+`Matrix4x4 QuaternionRotation(float i, float j, float k, float L)` converts the Quaternion formed by `i, j, k, L` into a `Matrix4x4` for use in opengl.
+
+`Matrix4x4 QuaternionRotation(Vector3 euler)` generates a `Matrix4x4` from a quaternion generated from euler axes. for use in opengl.
+
+`Matrix4x4 QuaternionRotation(float rx, float ry, float rz)` generates a `Matrix4x4` from a quaternion generated from euler axes. for use in opengl.
+
+`Vector4 QuaternionEuler(Vector3 axes)` generates a quaternion from euler axes.
+
+ 
+
+`Matrix4x4 Translation(float x, float y, float z)` generates and returns a translation matrix
+
+`Matrix4x4 Translation(Vector3 translation)`       generates and returns a translation matrix
+
+ 
+
+`Matrix4x4 Scalation(float x, float y, float z)` generates and returns an uneven scale matrix
+
+`Matrix4x4 Scalation(Vector3 scale)` generates and returns an uneven scale matrix
+
+`Matrix4x4 Scalation(float scale)` generates and returns an even scale matrix (equal in every direction).
+
+ 
+
+`Matrix4x4 Perspective(float FOV, float near, float far)` generates and returns a `Matrix4x4` to be used as a perspective matrix in opengl.
+
+`Matrix4x4 getIdentityMatrix()` returns an identity matrix
+
+ 
+
+`Matrix4x4 LookAt(Vector3 position, Vector3 target, Vector3 upDirection)` *work in progress*
+
+`Matrix4x4 Direction(float (&Mat)[4][4])` *work in progress*
+
+#### constructors
+
+`Matrix4x4(Vector4 x, Vector4 y, Vector4 z, Vector4 w)` generates a `Matrix4x4` containing the Vector4s `x`, `y`, `z` and `w`.
+
+`Matrix4x4` generates a `Matrix4x4` containing an identity matrix, wihtout parameters
+
+`Matrix4x4(float (&obj)[4][4])` initializes `Matrix4x4` from an matrix of `float` of size `[4][4]`
+
+`Matrix4x4(float (&x)[4], float (&y)[4], float (&z)[4], float (&w)[4])` initializes `Matrix4x4` from 4 arrays of `float` of size 4
+
+#### operators
+
+`operator+` adds two `Matrix4x4`s
+
+`operator-` substracts two `Matrix4x4`s
+
+`operator+=` adds the values of `Matrix4x4` to current
+
+`operator-=` substracts the values of `Matrix4x4` from current
+
+
+`operator*` multiplies a `Matrix4x4` by another `Matrix4x4`, performing matrix multiplication.
+
+`operator*` multiplies a `Matrix4x4` by a matrix of float of size `[4][4]`, performing matrix multiplication.
+
+`operator*` multiplies a `Matrix4x4` by a `Vector4`, performing matrix multiplication and returning a `Vector4`
+
+
+`operator==` returns `true` if two Matrix4x4s are equal and `false` if they are different
+
+`operator=` assigns a `Matrix4x4` *or* matrix of `float` of size `[4][4]` to the current `Matrix4x4`
+
+`operator[i]` returns the value at position `i`. *read only*
+
 ### Texture
 Loads a texture in memory. it also has functions for binding textures to opengl and swaping textures. work in progress
 #### Variables
