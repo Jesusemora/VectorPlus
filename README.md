@@ -18,9 +18,10 @@ Just download the file VectorPlus.h and include it in your program
 
 `const double TOLERANCE`
 
-## Classes
+# Classes
 ***
-### Vector2
+## Vector2
+
 #### Variables
 
 `float &x` reference to the first element of `pos[]`. can be used as `myVector2.x`.
@@ -84,7 +85,7 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector2` fill
 `operator==` returns `true` if two Vector2s are equal and `false` if they are different
 
 ___
-### Vector3
+## Vector3
 
 #### Variables
 
@@ -157,7 +158,7 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector3` fill
 `operator==` returns `true` if two Vector3s are equal and `false` if they are different
 
 ___
-### Vector4
+## Vector4
 
 #### Variables
 
@@ -230,7 +231,7 @@ ___
 `operator[i]` returns the value at position `i`. *read only*
 
 ___
-### Matrix4x4
+## Matrix4x4
 
 #### Variables
 
@@ -345,7 +346,7 @@ a `Matrix4x4` containing an identity matrix.
 `operator[i]` returns the value at position `i`. *read only*
 
 ___
-### Texture
+## Texture
 Loads a texture in memory. it also has functions for binding textures to opengl and swaping textures. work in progress
 #### Variables
 `int width` width of the image
@@ -402,8 +403,8 @@ ___
 `string debug()` returns a string with the sizes of the vectors of Mesh, used for testing of model loading and general debuging.
 
 ___
-### RawMesh
+## RawMesh
 not currently in use
 ___
-### UI_Transform
+## UI_Transform
 *work in progress*
