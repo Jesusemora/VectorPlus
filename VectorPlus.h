@@ -198,7 +198,6 @@ public:
 		return (a + b) * 0.5f;
 	}
 	
-	//static properties
 	static Vector2 down;
 	static Vector2 left;
 	static Vector2 right;
@@ -408,7 +407,6 @@ public:
 	//lerp
 	//
 	
-	//static properties
 	static Vector3 down;// = Vector3(0, -1, 0);
 	static Vector3 left;// = Vector3(-1, 0, 0);
 	static Vector3 right;// = Vector3(1, 0, 0);
