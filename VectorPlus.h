@@ -193,14 +193,24 @@ public:
 	}
 	//lerp
 	//
+	static Vector2 Lerp(Vector2 a, Vector2 b)
+	{
+		return (a + b) * 0.5f;
+	}
 	
 	//static properties
-	static Vector2 down;// = Vector2(0, -1);
-	static Vector2 left;// = Vector2(-1, 0);
-	static Vector2 right;// = Vector2(1, 0);
-	static Vector2 up;// = Vector2(0, 1);
-	static Vector2 zero;// = Vector2(0, 0);
+	static Vector2 down;
+	static Vector2 left;
+	static Vector2 right;
+	static Vector2 up;
+	static Vector2 zero;
 };
+
+Vector2 Vector2::down = Vector2(0, -1);
+Vector2 Vector2::left = Vector2(-1, 0);
+Vector2 Vector2::right = Vector2(1, 0);
+Vector2 Vector2::up = Vector2(0, 1);
+Vector2 Vector2::zero = Vector2(0, 0);
 
 class Vector3
 {
@@ -218,6 +228,11 @@ public:
 		x = posx;
 		y = posy;
 		z = posz;
+	}
+	
+	Vector3()
+	{
+		
 	}
 	
 	//OVERLOADING operator
@@ -360,14 +375,7 @@ public:
 	
 	static bool Equals(Vector3 a, Vector3 b)
 	{
-		if(a.x == b.x && a.y == b.y && a.z == b.z)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return (a.x == b.x && a.y == b.y && a.z == b.z);
 	}
 	
 	//angle
@@ -392,6 +400,11 @@ public:
 		return Vector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 	}
 	
+	static Vector3 Lerp(Vector3 a, Vector3 b)
+	{
+		return (a + b) * 0.5f;
+	}
+	
 	//lerp
 	//
 	
@@ -404,6 +417,14 @@ public:
 	static Vector3 back;// = Vector3(0, 0, -1);
 	static Vector3 zero;// = Vector3(0, 0, 0);
 };
+
+Vector3 Vector3::zero = Vector3(0, 0, 0);//what a mouthfull
+Vector3 Vector3::down = Vector3(0, -1, 0);
+Vector3 Vector3::left = Vector3(-1, 0, 0);
+Vector3 Vector3::right = Vector3(1, 0, 0);
+Vector3 Vector3::up = Vector3(0, 1, 0);
+Vector3 Vector3::forward = Vector3(0, 0, 1);
+Vector3 Vector3::back = Vector3(0, 0, -1);
 
 class Vector4
 {
@@ -1167,6 +1188,8 @@ public:
 	}
 	
 	//get identity matrix (default)
+	static Matrix4x4 Identity;
+	
 	static Matrix4x4 getIdentityMatrix()
 	{
 		Matrix4x4 mat;
@@ -1203,6 +1226,8 @@ public:
 		delete pos;
 	}*/
 };
+
+Matrix4x4 Matrix4x4::Identity = Matrix4x4;
 
 class Texture {
 public:
@@ -1242,6 +1267,8 @@ public:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this-> height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->imageO);
 			
 			glGenerateMipmap(GL_TEXTURE_2D);
+			//free(imageO);//WHAT THE F OPENGL
+			//it was a difficult day but the key to success is to never give up. and so we succeeded
 		}
 	}
 	
@@ -1250,6 +1277,7 @@ public:
 		if(imageO)
 		{
 			glActiveTexture(GL_TEXTURE0 + id);
+			//glBindTexture(GL_TEXTURE_2D, textureID[id]);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this->height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->imageO);
 			glGenerateMipmap(GL_TEXTURE_2D);//TODO image is in CPU memory AND GPU memory (in theory)
 			//we need a way to send ALL of the texture data into GPU memory and keep it there until program ends
@@ -1260,7 +1288,10 @@ public:
 	{
 		//glActiveTexture(GL_TEXTURE0);
 		//delete textures
-		free(imageO);
+		if(imageO)
+		{
+			free(imageO);
+		}
 	}
 };
 
@@ -1290,7 +1321,7 @@ public:
 	std::vector<float> uvs;
 	std::vector<float> tangents;
 	//std::vector<float> bitangents;
-	std::vector<int> indices;
+	std::vector<GLuint> indices;
 	int numverts;
 	int numindices;
 	std::string name;
@@ -1338,6 +1369,66 @@ public:
 			iverts += 9;
 			iuvs += 6;
 		}
+	}
+	
+	void calculateTangents(std::vector<Vector3> &uTangents, Vector3 edge1, Vector3 edge2, Vector2 deltaUV1, Vector2 deltaUV2)
+	{
+		float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+		
+		Vector3 tangent = Vector3((edge1.x * deltaUV2.y - edge2.x * deltaUV1.y) * f, (edge1.y * deltaUV2.y - edge2.y * deltaUV1.y) * f, (edge1.z * deltaUV2.y - edge2.z * deltaUV1.y) * f);
+		
+		uTangents.push_back(tangent);
+		uTangents.push_back(tangent);
+		uTangents.push_back(tangent);
+	}
+	
+	void GetTangents()
+	{
+		std::vector<Vector3> uTangents;
+		
+		for(int abc = 0; abc < this->numindices; abc+= 3)
+		{
+			Vector3 v0 = Vector3(this->vertices[this->indices[abc] * 3], this->vertices[this->indices[abc] * 3 + 1], this->vertices[this->indices[abc] * 3 + 2]);
+			Vector3 v1 = Vector3(this->vertices[this->indices[abc + 1] * 3], this->vertices[this->indices[abc + 1] * 3 + 1], this->vertices[this->indices[abc + 1] * 3 + 2]);
+			Vector3 v2 = Vector3(this->vertices[this->indices[abc + 2] * 3], this->vertices[this->indices[abc + 2] * 3 + 1], this->vertices[this->indices[abc + 2] * 3 + 2]);
+			
+			Vector2 uv0 = Vector2(this->uvs[this->indices[abc] * 2], this->uvs[this->indices[abc] * 2 + 1]);
+			Vector2 uv1 = Vector2(this->uvs[this->indices[abc + 1] * 2], this->uvs[this->indices[abc + 1] * 2 + 1]);
+			Vector2 uv2 = Vector2(this->uvs[this->indices[abc + 2] * 2], this->uvs[this->indices[abc + 2] * 2 + 1]);
+			
+			calculateTangents(uTangents, v1 - v0, v2 - v0, uv1 - uv0, uv2 - uv0);
+		}
+		
+		std::vector<Vector3> nTangents(this->vertices.size() / 3);
+		for(int ahc = 0; ahc < uTangents.size(); ahc++)
+		{
+			if(nTangents[this->indices[ahc]] == Vector3::zero)//not assigned
+			{
+				nTangents[this->indices[ahc]] = uTangents[ahc];
+			}
+			else
+			{
+				nTangents[this->indices[ahc]] = Vector3::Lerp(nTangents[this->indices[ahc]], uTangents[ahc]);//mix lerp average blend
+			}
+		}
+		
+		for(Vector3 aec : nTangents)
+		{
+			this->tangents.push_back(aec.x);
+			this->tangents.push_back(aec.y);
+			this->tangents.push_back(aec.z);//discombobulate
+		}
+		
+		//std::cout << "uTangents " << uTangents.size() << " nTangents " << nTangents.size() << " " << this->debug() << std::endl;
+	}
+	
+	std::string debug()
+	{
+		/*for(int aec : this->indices)
+		{
+			std::cout << aec << " ";
+		}*/
+		return std::to_string(vertices.size()) + " " + std::to_string(normals.size()) + " " + std::to_string(uvs.size()) + " " + std::to_string(tangents.size()) + " " + std::to_string(indices.size());
 	}
 };
 
