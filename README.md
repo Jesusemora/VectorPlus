@@ -182,14 +182,6 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector3` fill
 
 `Vector3 normalized` returns the normalized version of current `Vector3`
 
-#### static variables
-
-```
-Vector3 up, down, left, right, forward, back, zero
-```
-
-use these to quickly obtain a "vector" in a given direction, or a `Vector3` filled with 0
-
 #### static methods
 
 `float fastDistance(Vector4 a, Vector4 b)` returns the distance between a and b in a tiled space ( like chess ). *probably useless since it measures in 4 dimensions*
