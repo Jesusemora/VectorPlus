@@ -1267,8 +1267,7 @@ public:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this-> height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->imageO);
 			
 			glGenerateMipmap(GL_TEXTURE_2D);
-			//free(imageO);//WHAT THE F OPENGL
-			//it was a difficult day but the key to success is to never give up. and so we succeeded
+			//free(imageO);//
 		}
 	}
 	
@@ -1416,7 +1415,7 @@ public:
 		{
 			this->tangents.push_back(aec.x);
 			this->tangents.push_back(aec.y);
-			this->tangents.push_back(aec.z);//discombobulate
+			this->tangents.push_back(aec.z);
 		}
 		
 		//std::cout << "uTangents " << uTangents.size() << " nTangents " << nTangents.size() << " " << this->debug() << std::endl;
