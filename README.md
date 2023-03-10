@@ -19,6 +19,7 @@ Just download the file VectorPlus.h and include it in your program
 `const double TOLERANCE`
 
 ## Classes
+***
 ### Vector2
 #### Variables
 
@@ -82,6 +83,7 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector2` fill
 
 `operator==` returns `true` if two Vector2s are equal and `false` if they are different
 
+___
 ### Vector3
 
 #### Variables
@@ -154,6 +156,7 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector3` fill
 
 `operator==` returns `true` if two Vector3s are equal and `false` if they are different
 
+___
 ### Vector4
 
 #### Variables
@@ -226,6 +229,7 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector3` fill
 
 `operator[i]` returns the value at position `i`. *read only*
 
+___
 ### Matrix4x4
 
 #### Variables
@@ -340,6 +344,7 @@ a `Matrix4x4` containing an identity matrix.
 
 `operator[i]` returns the value at position `i`. *read only*
 
+___
 ### Texture
 Loads a texture in memory. it also has functions for binding textures to opengl and swaping textures. work in progress
 #### Variables
@@ -360,13 +365,15 @@ Loads a texture in memory. it also has functions for binding textures to opengl 
 
 `void SwapTexture(int id, GLuint *textureID)` used during render loop. assigns the current texture to the location `id` (`GL_TEXTURE0 + id`)
 
+___
 ### KX_Rotation
 interface for rotations
-work in progress
+*work in progress*
 ### Component
-work in progress
+*work in progress*
 ### KX_Vgroup
-work in progress
+*work in progress*
+___
 ### Mesh
 #### Variables
 
@@ -394,7 +401,9 @@ work in progress
 
 `string debug()` returns a string with the sizes of the vectors of Mesh, used for testing of model loading and general debuging.
 
+___
 ### RawMesh
 not currently in use
+___
 ### UI_Transform
-work in progress
+*work in progress*
