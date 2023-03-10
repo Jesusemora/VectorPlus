@@ -16,6 +16,8 @@ Just download the file VectorPlus.h and include it in your program
 
 `const double radian`
 
+`const double HALFPI`
+
 `const double TOLERANCE`
 
 # Classes
@@ -55,6 +57,10 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector2` fill
 `float Dot(Vector2 a, Vector2 b)` returns the dot product of a and b
 
 `Vector2 Lerp(Vector2 a, Vector2 b)` returns the middle point between a and b, equivalent to glsl mix(a, b, 0.5) or cg lerp(a, b, 0.5)
+
+`Vector2 Lerp(Vector2 a, Vector2 b, float c)` returns the point `c` between `a` and `b`, equivalent to glsl mix(a, b, c) or cg lerp(a, b, c)
+
+`Vector2 Slerp(Vector2 a, Vector2 b, float c)` smooth interpolation between `a` and `b` given `c`.
 
 #### constructors
 
@@ -127,6 +133,10 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector3` fill
 
 `Vector3 Lerp(Vector3 a, Vector3 b)` returns the middle point between a and b, equivalent to glsl mix(a, b, 0.5) or cg lerp(a, b, 0.5)
 
+`Vector3 Lerp(Vector3 a, Vector3 b, float c)` returns the point `c` between `a` and `b`, equivalent to glsl mix(a, b, c) or cg lerp(a, b, c)
+
+`Vector3 Slerp(Vector3 a, Vector3 b, float c)` smooth interpolation between `a` and `b` given `c`.
+
 #### constructors
 
 `Vector3(float x, float y, float z)` generates a `Vector3` containing the values `x`, `y` and `z`.
@@ -154,6 +164,8 @@ use these to quickly obtain a "vector" in a given direction, or a `Vector3` fill
 `operator*=` multiplies every value of current Vector3 by `float`
 
 `operator/=` divides every value of current `Vector3` by `float`
+
+`operator=` assigns the values of `Vector2` to current `Vector3`
 
 `operator==` returns `true` if two Vector3s are equal and `false` if they are different
 
@@ -361,6 +373,34 @@ Loads a texture in memory. it also has functions for binding textures to opengl 
 
 `void createTex(char* filePath)` loads a texture from file as RGB
 `void createTex(char* filePath, bool alpha)` when alpha is used, loads a texture from file as RBGA
+
+`void SetFlags(int ws, int wt, int filtmin, int filtmax, bool mipmap = true)` sets the horizontal and vertical wrapping `ws` and `wt`, filtering min and max `filtmin` and `filtmax` and wheter or not to generate mipmaps.
+
+ |ws||
+ |:---|:---|
+ |0 |repeat|
+ |1|clamp|
+ |2|mirrored|
+ 
+ |wt||
+ |:---|:---|
+ |0|repeat|
+ |1| clamp|
+ |2| mirrored|
+ 
+ |filtmin||
+ |:---|:---|
+ |0| nearest|
+ |1| linear|
+ |2| nearest mipmap nearest|
+ |3| nearest mipmap linear|
+ |4| linear mipmap nearest|
+ |5| linear mipmap linear|
+ 
+ |filtmax||
+ |:---|:---|
+ |0| nearest|
+ |1| linear|
 
 `void BindTexture(int id, GLuint *textureID)` binds the current texture to the location `id` using a `GLuint textureID` previously generated with `glGenTextures(`*size*`, textureID)`
 
