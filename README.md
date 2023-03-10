@@ -234,7 +234,7 @@ ___
 
 #### Variables
 
-`Vector4 pos[4]` naked array containing the values of Matrix4x4.the values are stored as an array of Vector4, so it is posible to do MyMatrix.x.x to access individual elements of the matrix or MyMatrix.x to access a Vector4. *this is mostly used internally, use x y z w whenever posible*
+`Vector4 pos[4]` naked array containing the values of `Matrix4x4`. The values are stored as an array of `Vector4`, so it is posible to do `MyMatrix.x.x` to access individual elements of the matrix or `MyMatrix.x` to access a `Vector4`. *this is mostly used internally, use x y z w whenever posible*
 
 `Vector4 &x` reference to the first  element of `pos[]`. can be used as `myVector4.x`.
 
