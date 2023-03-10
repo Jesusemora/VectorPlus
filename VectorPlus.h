@@ -8,6 +8,7 @@
 
 const double PI = 3.141592653589793;
 const double radian = PI / 180;
+const double HALFPI = radian * 90;
 
 const float TOLERANCE = 0.00001f;
 
@@ -198,6 +199,16 @@ public:
 		return (a + b) * 0.5f;
 	}
 	
+	static Vector2 Lerp(Vector2 a, Vector2 b, float c)
+	{
+		return (a + b) * c;
+	}
+	
+	static Vector2 Slerp(Vector2 a, Vector2 b, float c)
+	{
+		return (a + b) * std::sin(HALFPI * c);
+	}
+	
 	static Vector2 down;
 	static Vector2 left;
 	static Vector2 right;
@@ -341,6 +352,13 @@ public:
 		z = obj.z;
 	}
 	
+	Vector3 operator=(const Vector2 & obj)
+	{
+		this->x = obj.x;
+		this->y = obj.y;//how should this be handled?
+		return *this;
+	}
+	
 	//INTERNAL FUNCTIONS
 	float Magnitude()
 	{
@@ -402,6 +420,16 @@ public:
 	static Vector3 Lerp(Vector3 a, Vector3 b)
 	{
 		return (a + b) * 0.5f;
+	}
+	
+	static Vector3 Lerp(Vector3 a, Vector3 b, float c)
+	{
+		return (a + b) * c;
+	}
+	
+	static Vector3 Slerp(Vector3 a, Vector3 b, float c)
+	{
+		return (a + b) * std::sin(HALFPI * c);
 	}
 	
 	//lerp
@@ -602,7 +630,6 @@ public:
 		w = obj.w;
 	}
 	
-	//this is genious
 	void operator=(const float (&obj)[4])
 	{
 		x = obj[0];
@@ -992,7 +1019,7 @@ public:
 	
 	static Vector4 QuaternionEuler(Vector3 quato)
 	{
-		float qx = quato.x / 2;//i'm afraid to bitwise shift because these are floats that might be negative
+		float qx = quato.x / 2;
 		float qy = quato.y / 2;
 		float qz = quato.z / 2;
 		
@@ -1225,9 +1252,98 @@ public:
 	}*/
 };
 
-Matrix4x4 Matrix4x4::Identity = Matrix4x4;
+Matrix4x4 Matrix4x4::Identity = Matrix4x4();
 
 class Texture {
+private:
+	int twraps = 0;
+	int twrapt = 0;
+	/*
+	 * GL_TEXTURE_WRAP_S
+	 * 		GL_CLAMP_TO_EDGE
+	 * 		GL_MIRRORED_REPEAT
+	 * 		GL_REPEAT
+	 * GL_TEXTURE_WRAP_T
+	 * 		GL_CLAMP_TO_EDGE
+	 * 		GL_MIRRORED_REPEAT
+	 * 		GL_REPEAT
+	 */
+	int tfiltering_min = 1;
+	/*
+	 * GL_NEAREST
+	 * GL_LINEAR
+	 * GL_NEAREST_MIPMAP_NEAREST
+	 * GL_LINEAR_MIPMAP_NEAREST
+	 * GL_NEAREST_MIPMAP_LINEAR
+	 * GL_LINEAR_MIPMAP_LINEAR
+	 */
+	int tfiltering_max = 1;
+	/*
+	 * GL_NEAREST
+	 * GL_LINEAR
+	 */
+	
+	bool mipMaps = true;
+	
+	void setParams()
+	{
+		if(twraps == 1)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		}
+		else if(twraps == 2)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		}
+		if(twrapt == 1)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		}
+		else if(twrapt == 2)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+		}
+		if(tfiltering_min == 0)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		}
+		else if(tfiltering_min == 1)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		}
+		else if(tfiltering_min == 2)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		}
+		else if(tfiltering_min == 3)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+		}
+		else if(tfiltering_min == 4)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		}
+		else if(tfiltering_min == 5)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		}
+		if(tfiltering_max == 0)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		}
+		else
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+	}
+	
+	void setMipmap()
+	{
+		if(mipMaps)
+		{
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+	}
 public:
 	int width;
 	int height;
@@ -1237,6 +1353,15 @@ public:
 // 	{
 // 		
 // 	}
+	
+	void SetFlags(int ws, int wt, int filtmin, int filtmax, bool mipmap = true)
+	{
+		twraps = ws;
+		twrapt = wt;
+		tfiltering_min = filtmin;
+		tfiltering_max = filtmax;
+		mipMaps = mipmap;
+	}
 	
 	void createTex(char *filePath)
 	{
@@ -1259,13 +1384,16 @@ public:
 			
 			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			this->setParams();
+			//std::cout << glGetError() << std::endl;
 			
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this-> height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->imageO);
 			
-			glGenerateMipmap(GL_TEXTURE_2D);
-			//free(imageO);//
+			//glGenerateMipmap(GL_TEXTURE_2D);
+			this->setMipmap();
+			//free(imageO);
 		}
 	}
 	
@@ -1276,7 +1404,8 @@ public:
 			glActiveTexture(GL_TEXTURE0 + id);
 			//glBindTexture(GL_TEXTURE_2D, textureID[id]);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this->height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->imageO);
-			glGenerateMipmap(GL_TEXTURE_2D);//TODO image is in CPU memory AND GPU memory (in theory)
+			//this->setMipmap();
+			//glGenerateMipmap(GL_TEXTURE_2D);//TODO image is in CPU memory AND GPU memory (in theory)
 			//we need a way to send ALL of the texture data into GPU memory and keep it there until program ends
 		}
 	}
