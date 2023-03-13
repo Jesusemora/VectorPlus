@@ -245,6 +245,13 @@ public:
 		
 	}
 	
+	Vector3(const Vector3 &why)
+	{
+		this->x = why.x;
+		this->y = why.y;
+		this->z = why.z;
+	}
+	
 	//OVERLOADING operator
 	//VECTOR3
 	Vector3 operator+(Vector3 const& obj)
@@ -1595,6 +1602,7 @@ public:
 	
 	void GetTangents()
 	{
+		std::cout << "debug" << std::endl;
 		std::vector<Vector3> uTangents;
 		
 		for(int abc = 0; abc < this->numindices; abc+= 3)
@@ -1603,9 +1611,9 @@ public:
 			Vector3 v1(this->vertices[this->indices[abc + 1] * 3], this->vertices[this->indices[abc + 1] * 3 + 1], this->vertices[this->indices[abc + 1] * 3 + 2]);
 			Vector3 v2(this->vertices[this->indices[abc + 2] * 3], this->vertices[this->indices[abc + 2] * 3 + 1], this->vertices[this->indices[abc + 2] * 3 + 2]);
 			
-			Vector2 uv0 = Vector2(this->uvs[this->indices[abc] * 2], this->uvs[this->indices[abc] * 2 + 1]);
-			Vector2 uv1 = Vector2(this->uvs[this->indices[abc + 1] * 2], this->uvs[this->indices[abc + 1] * 2 + 1]);
-			Vector2 uv2 = Vector2(this->uvs[this->indices[abc + 2] * 2], this->uvs[this->indices[abc + 2] * 2 + 1]);
+			Vector2 uv0(this->uvs[this->indices[abc] * 2], this->uvs[this->indices[abc] * 2 + 1]);
+			Vector2 uv1(this->uvs[this->indices[abc + 1] * 2], this->uvs[this->indices[abc + 1] * 2 + 1]);
+			Vector2 uv2(this->uvs[this->indices[abc + 2] * 2], this->uvs[this->indices[abc + 2] * 2 + 1]);
 			
 			calculateTangents(uTangents, v1 - v0, v2 - v0, uv1 - uv0, uv2 - uv0);
 		}
@@ -1615,7 +1623,7 @@ public:
 		{
 			if(nTangents[this->indices[ahc]] == Vector3::zero)//not assigned
 			{
-				nTangents[this->indices[ahc]] = uTangents[ahc];
+				nTangents[this->indices[ahc]] = Vector3(uTangents[ahc]);
 			}
 			else
 			{
