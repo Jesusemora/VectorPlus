@@ -8,7 +8,9 @@
 
 const double PI = 3.141592653589793;
 const double radian = PI / 180;
+const double qadian = PI / 360;
 const double HALFPI = radian * 90;
+const float POINT_FIVE = 0.5;
 
 const float TOLERANCE = 0.00001f;
 
@@ -196,7 +198,7 @@ public:
 	//
 	static Vector2 Lerp(Vector2 a, Vector2 b)
 	{
-		return (a + b) * 0.5f;
+		return (a + b) * POINT_FIVE;
 	}
 	
 	static Vector2 Lerp(Vector2 a, Vector2 b, float c)
@@ -427,7 +429,7 @@ public:
 	
 	static Vector3 Lerp(Vector3 a, Vector3 b)
 	{
-		return (a + b) * 0.5f;
+		return (a + b) * POINT_FIVE;
 	}
 	
 	static Vector3 Lerp(Vector3 a, Vector3 b, float c)
@@ -460,10 +462,7 @@ Vector3 Vector3::up = Vector3(0, 1, 0);
 Vector3 Vector3::forward = Vector3(0, 0, 1);
 Vector3 Vector3::back = Vector3(0, 0, -1);
 
-class Vector4
-{
-protected:
-	//get set x
+class IVector4 {
 public:
 	float pos[4] = {0.0, 0.0, 0.0, 1.0};
 	
@@ -471,6 +470,42 @@ public:
 	float &y = this->pos[1];
 	float &z = this->pos[2];
 	float &w = this->pos[3];
+	
+	float Magnitude()
+	{
+		return (this->x * this->x) + (this->y * this->y) + (this->z * this->z) + (this->w * this->w);
+	}
+	
+	float sqrMagnitude()
+	{
+		return static_cast<float>(std::sqrt(this->Magnitude()));//must be non negative
+	}
+	
+	void QNormalize()
+	{
+		float mag2 = this->Magnitude();
+		if(fabs(mag2 - 1.0f) > TOLERANCE)
+		{
+			float mag = std::sqrt(mag2);
+			this->w /= mag;
+			this->x /= mag;
+			this->y /= mag;
+			this->z /= mag;
+		}
+	}
+};
+
+class Vector4 : public IVector4
+{
+protected:
+	//get set x
+public:
+	/*float pos[4] = {0.0, 0.0, 0.0, 1.0};
+	
+	float &x = this->pos[0];
+	float &y = this->pos[1];
+	float &z = this->pos[2];
+	float &w = this->pos[3];*/
 	
 	Vector4(float posx, float posy, float posz, float posw)
 	{
@@ -665,7 +700,7 @@ public:
 	}
 	
 	//INTERNAL FUNCTIONS
-	float Magnitude()
+	/*float Magnitude()
 	{
 		return (this->x * this->x) + (this->y * this->y) + (this->z * this->z) + (this->w * this->w);
 	}
@@ -673,7 +708,7 @@ public:
 	float sqrMagnitude()
 	{
 		return static_cast<float>(std::sqrt(this->Magnitude()));//must be non negative
-	}
+	}*/
 	
 	void Normalize()
 	{
@@ -684,7 +719,7 @@ public:
 		this->w = this->w / mag;
 	}
 	
-	void QNormalize()
+	/*void QNormalize()
 	{
 		float mag2 = this->Magnitude();
 		if(fabs(mag2 - 1.0f) > TOLERANCE)
@@ -695,7 +730,7 @@ public:
 			this->y /= mag;
 			this->z /= mag;
 		}
-	}
+	}*/
 	
 	Vector4 normalized()
 	{
@@ -708,6 +743,11 @@ public:
 		return res;
 	}
 	//operator float() const { return x.magnitude;}
+	
+	static float Dot(IVector4 a, IVector4 b)
+	{
+		return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
+	}
 	
 	static bool Equals(Vector4 a, Vector4 b)
 	{
@@ -726,15 +766,154 @@ public:
 		return static_cast<float>(std::sqrt(std::abs(a.Magnitude() - b.Magnitude())));
 	}
 	
-	static float Dot(Vector4 a, Vector4 b)
-	{
-		return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
-	}
-	
 	/*static Vector4 Cross(Vector4 a, Vector4 b)
 	{
 		return Vector4(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 	}*/
+};
+
+class Quaternion : public IVector4
+{
+public:
+	//initialize a Quaternion from euler angles
+	Quaternion(Vector3 quato)//euler rotation
+	{
+		float qx = quato.x * qadian;// / 2;//if radian is pi/180 then remove /2
+		float qy = quato.y * qadian;// / 2;
+		float qz = quato.z * qadian;// / 2;
+		
+		float qsinx = std::sin(qx);
+		float qcosx = std::cos(qx);
+		
+		float qsiny = std::sin(qy);
+		float qcosy = std::cos(qy);
+		
+		float qsinz = std::sin(qz);
+		float qcosz = std::cos(qz);
+		
+		float qcosXY = qcosx * qcosy;//can't make it more efficient than this
+		//are these too many variables?
+		
+		this->x = qsinx * qcosy * qcosz;
+		this->y = qcosx * qsiny * qcosz;
+		this->z = qcosXY * qsinz;
+		this->w = qcosXY * qcosz;
+	}
+	
+	Quaternion(float xr, float yr, float zr)
+	{
+		float qx = xr * qadian;// / 2;// * radian;
+		float qy = yr * qadian;// / 2;// * radian;
+		float qz = zr * qadian;// / 2;// * radian;
+		
+		float qsinx = std::sin(qx);
+		float qcosx = std::cos(qx);
+		
+		float qsiny = std::sin(qy);
+		float qcosy = std::cos(qy);
+		
+		float qsinz = std::sin(qz);
+		float qcosz = std::cos(qz);
+		
+		float qcosXY = qcosx * qcosy;//can't make it more efficient than this
+		//are these too many variables?
+		
+		this->x = qsinx * qcosy * qcosz;
+		this->y = qcosx * qsiny * qcosz;
+		this->z = qcosXY * qsinz;
+		this->w = qcosXY * qcosz;
+	}
+	
+	//initialize a Quaternion from Quaternion
+	Quaternion(float j, float k, float i, float l)
+	{
+		this->x = j;
+		this->y = k;
+		this->z = i;
+		this->w = l;
+	}
+	
+	//initialize a Quaternion no parameters
+	Quaternion()
+	{
+		
+	}
+	
+	static float Dot(IVector4 a, IVector4 b)
+	{
+		return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
+	}
+	
+	Quaternion operator*(const Quaternion & obj) const
+	{
+		return Quaternion(
+			this->w * obj.x + this->x * obj.w + this->y * obj.z - this->z * obj.y, this->w * obj.y + this->y * obj.w + this->z * obj.x - this->x * obj.z, this->w * obj.z + this->z * obj.w + this->x * obj.y - this->y * obj.x, this->w * obj.w - this->x * obj.x - this->y * obj.y - this->z * obj.z);
+	}
+	
+	Quaternion operator*=(const Quaternion & obj) const
+	{
+		this->x = this->w * obj.x + this->x * obj.w + this->y * obj.z - this->z * obj.y;
+		this->y = this->w * obj.y + this->y * obj.w + this->z * obj.x - this->x * obj.z;
+		this->z = this->w * obj.z + this->z * obj.w + this->x * obj.y - this->y * obj.x;
+		this->w = this->w * obj.w - this->x * obj.x - this->y * obj.y - this->z * obj.z;
+	}
+	
+	Quaternion inverse()//conjugate
+	{
+		Quaternion quato;
+		//float mag = this->sqrMagnitude();
+		quato.x = -this->x;
+		quato.y = -this->y;
+		quato.z = -this->z;
+		quato.w = this->w;
+		return quato;
+	}
+	
+	bool operator==(const IVector4 & obj) const
+	{
+		return (std::abs(Quaternion::Dot(*this, obj) - 1.0) < 0.001);
+	}
+	
+	Quaternion operator=(const Quaternion & obj)
+	{
+		this->x = obj.x;
+		this->y = obj.y;
+		this->z = obj.z;
+		this->w = obj.w;
+		return *this;
+	}
+	
+	static Quaternion Slerp(Quaternion a, Quaternion b, double c)
+	{
+		Quaternion quato;
+		double CHT = Quaternion::Dot(a, b);//a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z;
+		if(std::abs(CHT) >= 1.0)//Quaternion s are equal
+		{
+			quato.w = a.w;
+			quato.x = a.x;
+			quato.y = a.y;
+			quato.z = a.z;
+			return quato;
+		}
+		double HT = std::acos(CHT);
+		double SHT = std::sqrt(1.0 - CHT*CHT);
+		if(std::fabs(SHT) < TOLERANCE)
+		{
+			quato.w = (a.w + b.w * POINT_FIVE);
+			quato.x = (a.x + b.x * POINT_FIVE);
+			quato.y = (a.y + b.y * POINT_FIVE);
+			quato.z = (a.z + b.z * POINT_FIVE);
+			return quato;
+		}
+		double rA = std::sin((1 - c) * HT) / SHT;
+		double rB = std::sin(c * HT) / SHT;
+		quato.w = a.w * rA + b.w * rB;
+		quato.x = a.x * rA + b.x * rB;
+		quato.y = a.y * rA + b.y * rB;
+		quato.z = a.z * rA + b.z * rB;
+		//return a * a.inverse * b * c;//(b * a.inverse()) * c * a;
+		return quato;
+	}
 };
 
 class Matrix4x4
@@ -962,7 +1141,7 @@ public:
 		return Matrix4x4::Euler(phi * PI, theta * PI, psi * PI);
 	}
 	
-	static Matrix4x4 QuaternionRotation(Vector4 quato)
+	static Matrix4x4 QuaternionRotation(IVector4 quato)
 	{
 		quato.QNormalize();
 		//2 * ((quato.x * quato.x) + (quato.y * quato.y)) - 1
@@ -985,6 +1164,12 @@ public:
 			0, 
 			1));
 		return qRotation;
+	}
+	
+	//initialize Matrix4x4 from Quaternion
+	Matrix4x4(Quaternion quato)
+	{
+		*this = QuaternionRotation(quato);
 	}
 	
 	static Matrix4x4 QuaternionRotation(float i, float j, float k, float L)
@@ -1012,7 +1197,7 @@ public:
 	
 	static Matrix4x4 QuaternionRotation(Vector3 quato)
 	{
-		return QuaternionRotation(QuaternionEuler(quato));
+		return QuaternionRotation(Quaternion(quato));
 	}
 	static Matrix4x4 QuaternionRotation(float rx, float ry, float rz)
 	{
@@ -1024,29 +1209,6 @@ public:
 		
 		Matrix4x4 qRotation = QuaternionRotation();
 	}*/
-	
-	static Vector4 QuaternionEuler(Vector3 quato)
-	{
-		float qx = quato.x / 2;
-		float qy = quato.y / 2;
-		float qz = quato.z / 2;
-		
-		float qsinx = std::sin(qx);
-		float qcosx = std::cos(qx);
-		
-		float qsiny = std::sin(qy);
-		float qcosy = std::cos(qy);
-		
-		float qsinz = std::sin(qz);
-		float qcosz = std::cos(qz);
-		
-		float qcosXY = qcosx * qcosy;//can't make it more efficient than this
-		//are these too many variables?
-		
-		Vector4 Yrotation(qsinx * qcosy * qcosz, qcosx * qsiny * qcosz, qcosXY * qsinz, qcosXY * qcosz);
-		
-		return Yrotation;
-	}
 	
 	//Euler 3 fields
 	void Rotate(float &phi, float &theta, float &psi)
@@ -1062,7 +1224,7 @@ public:
 	}
 	//Quaternion 4 fields
 	
-	void Rotate(Vector4 &quato)
+	void Rotate(IVector4 &quato)
 	{
 		
 	}
@@ -1181,7 +1343,7 @@ public:
 		Matrix4x4 Mat;
 		float persp = FOV * radian;
 		float aspectRatio = 4.0 / 3.0;
-		persp = 2.0f * atanf(tanf(persp * 0.5) / aspectRatio);
+		persp = 2.0f * atanf(tanf(persp * POINT_FIVE) / aspectRatio);
 		
 		float tangent = tanf(persp / 2.0f);
 		float height = near * tangent;
@@ -1516,9 +1678,6 @@ public:
 class KX_Rotation {
 public:
 	float RMatrix[4][4];
-	
-	virtual void Rotate()
-	{}
 };
 
 class Component {
