@@ -33,10 +33,9 @@ class Matrix4x4;
 class Vector2
 {
 protected:
-	float pos[2] = {0.0, 0.0};//replace with 4x4
-	
 	//get set x
 public:
+	float pos[2] = {0.0, 0.0};//replace with 4x4
 	
 	float &x = this->pos[0];
 	float &y = this->pos[1];
@@ -69,12 +68,14 @@ public:
 	{
 		this->x += obj.x;
 		this->y += obj.y;
+		return *this;
 	}
 	
 	Vector2& operator-=(const Vector2 & obj)
 	{
 		this->x -= obj.x;
 		this->y -= obj.y;
+		return *this;
 	}
 	
 	//FLOAT VECTOR2
@@ -115,12 +116,14 @@ public:
 	{
 		this->x *= obj;
 		this->y *= obj;
+		return *this;
 	}
 	
 	Vector2 operator/=(float const& obj)
 	{
 		this->x /= obj;
 		this->y /= obj;
+		return *this;
 	}
 	
 	//SPECIAL
@@ -279,6 +282,7 @@ public:
 		this->x += obj.x;
 		this->y += obj.y;
 		this->z += obj.z;
+		return *this;
 	}
 	
 	Vector3& operator-=(const Vector3 & obj)
@@ -286,6 +290,7 @@ public:
 		this->x -= obj.x;
 		this->y -= obj.y;
 		this->z -= obj.z;
+		return *this;
 	}
 	
 	//FLOAT VECTOR3
@@ -331,6 +336,7 @@ public:
 		this->x *= obj;
 		this->y *= obj;
 		this->z *= obj;
+		return *this;
 	}
 	
 	Vector3 operator/=(float const& obj)
@@ -338,6 +344,7 @@ public:
 		this->x /= obj;
 		this->y /= obj;
 		this->z /= obj;
+		return *this;
 	}
 	
 	//SPECIAL
@@ -569,6 +576,7 @@ public:
 		this->y += obj.y;
 		this->z += obj.z;
 		this->w += obj.w;
+		return *this;
 	}
 	
 	Vector4& operator-=(const Vector4 & obj)
@@ -577,6 +585,7 @@ public:
 		this->y -= obj.y;
 		this->z -= obj.z;
 		this->w -= obj.w;
+		return *this;
 	}
 	
 	/*Vector4 operator*(Matrix4x4 const& obj)
@@ -641,6 +650,7 @@ public:
 		this->y *= obj;
 		this->z *= obj;
 		this->w *= obj;
+		return *this;
 	}
 	
 	Vector4 operator/=(float const& obj)
@@ -649,6 +659,7 @@ public:
 		this->y /= obj;
 		this->z /= obj;
 		this->w /= obj;
+		return *this;
 	}
 	
 	//SPECIAL
@@ -856,6 +867,7 @@ public:
 		this->y = this->w * obj.y + this->y * obj.w + this->z * obj.x - this->x * obj.z;
 		this->z = this->w * obj.z + this->z * obj.w + this->x * obj.y - this->y * obj.x;
 		this->w = this->w * obj.w - this->x * obj.x - this->y * obj.y - this->z * obj.z;
+		return *this;
 	}
 	
 	Quaternion inverse()//conjugate
@@ -998,6 +1010,7 @@ public:
 		this->y += obj.y;
 		this->z += obj.z;
 		this->w += obj.w;
+		return *this;
 	}
 	
 	Matrix4x4& operator-=(const Matrix4x4 & obj)
@@ -1006,6 +1019,7 @@ public:
 		this->y -= obj.y;
 		this->z -= obj.z;
 		this->w -= obj.w;
+		return *this;
 	}
 	
 	//MATRIX OPERATIONS
@@ -1221,12 +1235,6 @@ public:
 	{
 		Matrix4x4 Yrotation = EulerRotation(AvadaKadabra.x, AvadaKadabra.y, AvadaKadabra.z);
 		this->mulMatrix(Yrotation);
-	}
-	//Quaternion 4 fields
-	
-	void Rotate(IVector4 &quato)
-	{
-		
 	}
 	
 	//Get translation
@@ -1534,13 +1542,13 @@ public:
 		mipMaps = mipmap;
 	}
 	
-	void createTex(char *filePath)
+	void createTex(const char *filePath)
 	{
 		imageO = SOIL_load_image(filePath, &width, &height, 0, SOIL_LOAD_RGB);
 		isAlpha = false;
 	}
 	
-	void createTex(char *filePath, bool alpha)
+	void createTex(const char *filePath, bool alpha)
 	{
 		imageO = SOIL_load_image(filePath, &width, &height, 0, SOIL_LOAD_RGBA);
 		isAlpha = alpha;
@@ -1575,7 +1583,7 @@ public:
 		}
 	}
 	
-	void SwapTexture(int id, GLuint *textureID)
+	void SwapTexture(int id)//, GLuint *textureID)
 	{
 		if(imageO)
 		{
