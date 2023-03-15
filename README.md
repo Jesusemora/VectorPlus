@@ -12,18 +12,19 @@ This library contains a class that uses the SOIL library for loading textures, s
 Just download the file VectorPlus.h and include it in your program
 
 ## Classes
-Vector2
 
-Vector3
+**Vector2**: for use in 2D, UI and to store UVs.
 
-Vector4
+**Vector3**: for use in 3D, to store vertex positions, normals, tangents, object positions and others.
 
-Quaternion
+**Vector4**: easily converted to array of `float[4]`, compatible with `Matrix4x4`. can be generated from `Vector3`.
 
-Matrix4x4
+**Quaternion**: for use in rotations.
 
-Texture
+**Matrix4x4**: stores a matrix `float[4][4]`, for use with opengl. can interact with other classes like `Vector4` and `Quaternion`.
 
-Skybox
+**Texture**: RGB or RGBA texture for use in opengl. uses the `SOIL` library for loading images.
 
-Mesh
+**Skybox**:*work in progress*
+
+**Mesh**: Can store a simple mesh, supports normals, uvs, tangents and indices.
