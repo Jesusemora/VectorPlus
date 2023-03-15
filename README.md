@@ -13,10 +13,17 @@ Just download the file VectorPlus.h and include it in your program
 
 ## Classes
 Vector2
+
 Vector3
+
 Vector4
+
 Quaternion
+
 Matrix4x4
+
 Texture
+
 Skybox
+
 Mesh
