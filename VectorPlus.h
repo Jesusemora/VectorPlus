@@ -5,6 +5,9 @@
 #include <string>
 #include <cmath>
 #include <vector>
+#include <unordered_map>
+#include <utility>
+#include <algorithm>
 
 const double PI = 3.141592653589793;
 const double radian = PI / 180;
@@ -30,6 +33,21 @@ const float TOLERANCE = 0.00001f;
 class Vector4;
 class Matrix4x4;
 
+class Sub2 {
+	
+};
+
+class Sub3 {
+	float &x;
+	float &y;
+	float &z;
+	
+	Sub3(float &posx, float &posy, float &posz) : x(posx), y(posy), z(posz)
+	{
+		
+	}
+};
+
 class Vector2
 {
 protected:
@@ -44,6 +62,11 @@ public:
 	{
 		x = posx;
 		y = posy;
+	}
+	
+	Vector2()
+	{
+		
 	}
 	
 	//OVERLOADING operator
@@ -446,7 +469,7 @@ public:
 	
 	static Vector3 Slerp(Vector3 a, Vector3 b, float c)
 	{
-		return (a + b) * std::sin(HALFPI * c);
+		return (a + b) * std::sin(HALFPI * c);//TODO make correct geometrical Slerp //so far this is just cosmetic, to get a smooth transition for camera or objects
 	}
 	
 	//lerp
@@ -468,6 +491,328 @@ Vector3 Vector3::right = Vector3(1, 0, 0);
 Vector3 Vector3::up = Vector3(0, 1, 0);
 Vector3 Vector3::forward = Vector3(0, 0, 1);
 Vector3 Vector3::back = Vector3(0, 0, -1);
+
+class Vector2Int {//for use in pathfinding
+public:
+	int pos[2] = {0, 0};
+	
+	int &x = this->pos[0]; 
+	int &y = this->pos[1];
+	
+	Vector2Int(float posx, float posy)
+	{
+		this->x = std::round(posx);
+		this->y = std::round(posy);
+	}
+	
+	Vector2Int(int posx, int posy)
+	{
+		this->x = posx;
+		this->y = posy;
+	}
+	
+	Vector2Int()
+	{
+		
+	}
+	
+	Vector2Int(const Vector2 &why)
+	{
+		this->x = std::round(why.x);
+		this->y = std::round(why.y);
+	}
+	
+	Vector2Int(const Vector3 &why)
+	{
+		this->x = std::round(why.x);
+		this->y = std::round(why.y);
+	}
+	
+	Vector2Int operator+(Vector2Int const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = this->x + obj.x;
+		res.y = this->y + obj.y;
+		return res;
+	}
+	
+	Vector2Int operator-(Vector2Int const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = this->x - obj.x;
+		res.y = this->y - obj.y;
+		return res;
+	}
+	
+	Vector2Int operator+(Vector2 const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = this->x + std::round(obj.x);
+		res.y = this->y + std::round(obj.y);
+		return res;
+	}
+	
+	Vector2Int operator-(Vector2 const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = this->x - std::round(obj.x);
+		res.y = this->y - std::round(obj.y);
+		return res;
+	}
+	
+	Vector2Int& operator+=(const Vector2Int & obj)
+	{
+		this->x += obj.x;
+		this->y += obj.y;
+		return *this;
+	}
+	
+	Vector2Int& operator-=(const Vector2Int & obj)
+	{
+		this->x -= obj.x;
+		this->y -= obj.y;
+		return *this;
+	}
+	
+	Vector2Int& operator+=(const Vector2 & obj)
+	{
+		this->x += std::round(obj.x);
+		this->y += std::round(obj.y);
+		return *this;
+	}
+	
+	Vector2Int& operator-=(const Vector2 & obj)
+	{
+		this->x -= std::round(obj.x);
+		this->y -= std::round(obj.y);
+		return *this;
+	}
+	
+	//FLOAT VECTOR2
+	Vector2Int operator*(float const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = std::round(this->x * obj);
+		res.y = std::round(this->y * obj);
+		return res;
+	}
+	
+	Vector2Int operator*(double const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = std::round(this->x * obj);
+		res.y = std::round(this->y * obj);
+		return res;
+	}
+	
+	Vector2Int operator*(int const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = this->x * obj;
+		res.y = this->y * obj;
+		return res;
+	}
+	
+	Vector2Int operator/(float const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = std::round(this->x / obj);
+		res.y = std::round(this->y / obj);
+		return res;
+	}
+	
+	Vector2Int operator/(int const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = this->x / obj;
+		res.y = this->y / obj;
+		return res;
+	}
+	
+	Vector2Int operator+(float const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = std::round(this->x + obj);
+		res.y = std::round(this->y + obj);
+		return res;
+	}
+	
+	Vector2Int operator+(int const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = this->x + obj;
+		res.y = this->y + obj;
+		return res;
+	}
+	
+	Vector2Int operator-(float const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = std::round(this->x - obj);
+		res.y = std::round(this->y - obj);
+		return res;
+	}
+	
+	Vector2Int operator-(int const& obj)
+	{
+		Vector2Int res(0, 0);
+		res.x = this->x - obj;
+		res.y = this->y - obj;
+		return res;
+	}
+	
+	//FLOAT
+	Vector2Int operator*=(float const& obj)
+	{
+		this->x = std::round(this->x * obj);
+		this->y = std::round(this->y * obj);
+		return *this;
+	}
+	
+	Vector2Int operator/=(float const& obj)
+	{
+		this->x = std::round(this->x / obj);
+		this->y = std::round(this->y / obj);
+		return *this;
+	}
+	
+	Vector2Int operator*=(int const& obj)
+	{
+		this->x *= obj;
+		this->y *= obj;
+		return *this;
+	}
+	
+	Vector2Int operator/=(int const& obj)
+	{
+		this->x /= obj;
+		this->y /= obj;
+		return *this;
+	}
+	
+	//SPECIAL
+	
+	bool operator==(const Vector2Int & obj) const
+	{
+		return (this->x == obj.x && this->y == obj.y);
+	}
+	
+	bool operator==(const Vector2 & obj) const
+	{
+		return (this->x == std::round(obj.x) && this->y == std::round(obj.y));
+	}
+	
+	bool operator==(const Vector3 & obj) const
+	{
+		return (this->x == std::round(obj.x) && this->y == std::round(obj.y));
+	}
+	
+	//INTERNAL FUNCTIONS
+	float Magnitude()
+	{
+		return (this->x * this->x) + (this->y * this->y);
+	}
+	
+	float sqrMagnitude()
+	{
+		return static_cast<float>(std::sqrt(this->Magnitude()));//must be non negative
+	}
+	
+	void Normalize()
+	{
+		float mag = this->sqrMagnitude();
+		this->x = this->x / mag;
+		this->y = this->y / mag;
+		//this->z = this->z / mag;
+	}
+	
+	Vector2Int normalized()
+	{
+		Vector2Int res(0, 0);
+		float mag = this->sqrMagnitude();
+		res.x = std::round(this->x / mag);
+		res.y = std::round(this->y / mag);
+		return res;
+	}
+	//operator float() const { return x.magnitude;}
+	
+	static bool Equals(Vector2Int &a, Vector2Int &b)
+	{
+		if(a.x == b.x && a.y == b.y)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	//angle
+	//clampmagnitude
+	static float fastDistance(Vector2Int a, Vector2Int b)
+	{
+		return std::abs((a.x + a.y) - (b.x + b.y));
+	}
+	
+	static float Distance(Vector2Int a, Vector2Int b)
+	{
+		return static_cast<float>(std::sqrt(std::abs(a.Magnitude() - b.Magnitude())));
+	}
+	
+	static int Dot(Vector2Int a, Vector2Int b)
+	{
+		return (a.x * b.x) + (a.y * b.y);
+	}
+	//lerp
+	//
+	static Vector2Int Lerp(Vector2Int a, Vector2Int b)
+	{
+		return (a + b) * POINT_FIVE;
+	}
+	
+	static Vector2Int Lerp(Vector2Int a, Vector2Int b, float c)
+	{
+		return (a + b) * c;
+	}
+	
+};
+
+class Nav_Node2D : public Vector2Int
+{
+public:
+	std::vector<Nav_Node2D*> Children;
+	bool visited = false;
+	
+	static bool compareInterval(std::pair<float, Nav_Node2D*> i1, std::pair<float, Nav_Node2D*> i2)
+	{
+		return i1.first < i2.first;
+	}
+	
+	void OrderBySize(Vector2Int goal)
+	{
+		std::vector<std::pair<float, Nav_Node2D*>> Distances;
+		if(!Children.empty())
+		{
+			for(auto &ch : Children)
+			{
+				Distances.push_back(std::make_pair(Vector2Int::Distance(*ch, goal), ch));
+			}
+			std::sort(Distances.begin(), Distances.end(), compareInterval);
+			//sort
+			
+			Children.clear();
+			for(auto x : Distances)
+			{
+				Children.push_back(x.second);//this will be a mess, there should be a way to optimize
+			}
+		}
+	}
+	
+	//static Vector2Int Directions[8];//try to use nodes in navmesh instead //reserve directions for Nav_NodeGrid ( * directions) and Nav_NodeTower ( + directions)
+};
+
+//Vector2Int Nav_Node2D::Directions[8] = {Vector2Int(1, 0), Vector2Int(1, 1), Vector2Int(0, 1), Vector2Int(-1, 1), Vector2Int(-1, 0), Vector2Int(-1, -1), Vector2Int(0, -1), Vector2Int(1, -1)};
 
 class IVector4 {
 public:
@@ -499,6 +844,78 @@ public:
 			this->y /= mag;
 			this->z /= mag;
 		}
+	}
+};
+
+class Sub4 {
+public:
+	float &x;
+	float &y;
+	float &z;
+	float &w;
+	
+	Sub4(float &posx, float &posy, float &posz, float &posw) : x(posx), y(posy), z(posz), w(posw)
+	{
+		
+	}
+	
+	Sub4(float *obj) : x(obj[0]), y(obj[1]), z(obj[2]), w(obj[3])
+	{
+		
+	}
+	
+	void operator=(const IVector4 & obj)
+	{
+		this->x = obj.x;
+		this->y = obj.y;
+		this->z = obj.z;
+		this->w = obj.w;
+	}
+	
+	void operator=(const float(&obj)[4])
+	{
+		this->x = obj[0];
+		this->y = obj[1];
+		this->z = obj[2];
+		this->w = obj[3];
+	}
+	
+	void operator=(const Sub4 & obj)
+	{
+		this->x = obj.x;
+		this->y = obj.y;
+		this->z = obj.z;
+		this->w = obj.w;
+	}
+	
+	void operator=(const Vector3 & obj)
+	{
+		this->x = obj.x;
+		this->y = obj.y;
+		this->z = obj.z;
+	}
+	
+	Sub4 operator+=(const Sub4 & obj)
+	{
+		this->x += obj.x;
+		this->y += obj.y;
+		this->z += obj.z;
+		this->w += obj.w;
+		return *this;
+	}
+	
+	Sub4 operator-=(const Sub4 & obj)
+	{
+		this->x -= obj.x;
+		this->y -= obj.y;
+		this->z -= obj.z;
+		this->w -= obj.w;
+		return *this;
+	}
+	
+	bool operator==(const Sub4 & obj) const
+	{
+		return (this->x == obj.x && this->y == obj.y && this->z == obj.z && this->w == obj.w);
 	}
 };
 
@@ -702,12 +1119,26 @@ public:
 		return *this;
 	}
 	
+	Vector4 operator=(const Sub4 & obj)
+	{
+		this->x = obj.x;
+		this->y = obj.y;
+		this->z = obj.z;
+		this->w = obj.w;
+		return *this;
+	}
+	
 	void toArray(float (&obj)[4])
 	{
 		obj[0] = this->x;
 		obj[1] = this->y;
 		obj[2] = this->z;
 		obj[3] = this->w;
+	}
+	
+	float* toArray()
+	{
+		return this->pos;
 	}
 	
 	//INTERNAL FUNCTIONS
@@ -933,15 +1364,21 @@ class Matrix4x4
 protected:
 	//col row
 public:
-	Vector4 pos[4] = {Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0), Vector4(0, 0, 1, 0), Vector4(0, 0, 0, 1)};
+	float pos[4][4] = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+	//Vector4 pos[4] = {Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0), Vector4(0, 0, 1, 0), Vector4(0, 0, 0, 1)};
 	//pos = {Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0), Vector4(0, 0, 1, 0), Vector4(0, 0, 0, 1)};
 	
-	Vector4 &x = this->pos[0];
+	/*Vector4 &x = this->pos[0];
 	Vector4 &y = this->pos[1];
 	Vector4 &z = this->pos[2];
-	Vector4 &w = this->pos[3];
+	Vector4 &w = this->pos[3];*/
 	
-	Matrix4x4(Vector4 matx, Vector4 maty, Vector4 matz, Vector4 matw)
+	Sub4 x = Sub4(this->pos[0]);
+	Sub4 y = Sub4(this->pos[1]);
+	Sub4 z = Sub4(this->pos[2]);
+	Sub4 w = Sub4(this->pos[3]);
+	
+	Matrix4x4(const Vector4 &matx, const  Vector4 &maty, const Vector4 &matz, const  Vector4 &matw)
 	{
 		x = matx;
 		y = maty;
@@ -972,7 +1409,7 @@ public:
 	}
 	
 	//this does [][]
-	Vector4 operator[](int i) const
+	/*Vector4 operator[](int i) const
 	{
 		if(i < 4 && i >= 0)
 		{
@@ -982,25 +1419,25 @@ public:
 		{
 			return this->pos[0];
 		}
-	}
+	}*/
 	
 	Matrix4x4 operator+(Matrix4x4 const& obj)
 	{
-		Matrix4x4 res;
-		res.x = this->x + obj.x;
-		res.y = this->y + obj.y;
-		res.z = this->z + obj.z;
-		res.w = this->w + obj.w;
+		Matrix4x4 res(this->pos);
+		res.x += obj.x;
+		res.y += obj.y;
+		res.z += obj.z;
+		res.w += obj.w;
 		return res;
 	}
 	
 	Matrix4x4 operator-(Matrix4x4 const& obj)
 	{
-		Matrix4x4 res;
-		res.x = this->x - obj.x;
-		res.y = this->y - obj.y;
-		res.z = this->z - obj.z;
-		res.w = this->w - obj.w;
+		Matrix4x4 res(this->pos);
+		res.x -= obj.x;
+		res.y -= obj.y;
+		res.z -= obj.z;
+		res.w -= obj.w;
 		return res;
 	}
 	
@@ -1030,10 +1467,10 @@ public:
 		{
 			for(int j = 0; j < 4; j++)
 			{
-				res.pos[i].pos[j] = 0;
+				res.pos[i][j] = 0;
 				for(int k = 0; k < 4; k++)
 				{
-					res.pos[i].pos[j] += this->pos[i][k] * obj[k][j];
+					res.pos[i][j] += this->pos[i][k] * obj.pos[k][j];
 				}
 			}
 		}
@@ -1048,10 +1485,10 @@ public:
 		{
 			for(int j = 0; j < 4; j++)
 			{
-				res.pos[i].pos[j] = 0;
+				res.pos[i][j] = 0;
 				for(int k = 0; k < 4; k++)
 				{
-					res.pos[i].pos[j] += this->pos[i][k] * obj[k][j];
+					res.pos[i][j] += this->pos[i][k] * obj[k][j];
 				}
 			}
 		}
@@ -1067,10 +1504,10 @@ public:
 		{
 			for(int j = 0; j < 4; j++)
 			{
-				res.pos[i].pos[j] = 0;
+				res.pos[i][j] = 0;
 				for(int k = 0; k < 4; k++)
 				{
-					res.pos[i].pos[j] += this->pos[i][k] * obj[k][j];
+					res.pos[i][j] += this->pos[i][k] * obj.pos[k][j];
 				}
 			}
 		}
@@ -1089,7 +1526,7 @@ public:
 			res.pos[j] = 0;
 			for(int k = 0; k < 4; k++)
 			{
-				res.pos[j] += (obj.pos[k] * this->pos[k].pos[j]);
+				res.pos[j] += (obj.pos[k] * this->pos[k][j]);
 			}
 		}
 		return res;
@@ -1117,25 +1554,29 @@ public:
 	
 	void operator=(const float (&obj)[4][4])
 	{
-		this->x.x = obj[0][0];
-		this->x.y = obj[0][1];
-		this->x.z = obj[0][2];
-		this->x.w = obj[0][3];
+		//this->x.x = obj[0][0];
+		//this->x.y = obj[0][1];
+		//this->x.z = obj[0][2];
+		//this->x.w = obj[0][3];
+		this->x = obj[0];
+		this->y = obj[1];
+		this->z = obj[2];
+		this->w = obj[3];
 		
-		this->y.x = obj[1][0];
-		this->y.y = obj[1][1];
-		this->y.z = obj[1][2];
-		this->y.w = obj[1][3];
-		
-		this->z.x = obj[2][0];
-		this->z.y = obj[2][1];
-		this->z.z = obj[2][2];
-		this->z.w = obj[2][3];
-		
-		this->w.x = obj[3][0];
-		this->w.y = obj[3][1];
-		this->w.z = obj[3][2];
-		this->w.w = obj[3][3];
+// 		this->y.x = obj[1][0];
+// 		this->y.y = obj[1][1];
+// 		this->y.z = obj[1][2];
+// 		this->y.w = obj[1][3];
+// 		
+// 		this->z.x = obj[2][0];
+// 		this->z.y = obj[2][1];
+// 		this->z.z = obj[2][2];
+// 		this->z.w = obj[2][3];
+// 		
+// 		this->w.x = obj[3][0];
+// 		this->w.y = obj[3][1];
+// 		this->w.z = obj[3][2];
+// 		this->w.w = obj[3][3];
 	}
 	
 	static Matrix4x4 Euler(float phi, float theta, float psi)
@@ -1343,6 +1784,11 @@ public:
 		obj[3][1] = this->w.y;
 		obj[3][2] = this->w.z;
 		obj[3][3] = this->w.w;
+	}//AAAAHHHH there's no way to return an array from inside class without defining a new array of array //FIXED HAHA
+	
+	float* toArray()
+	{
+		return *this->pos;//EVERYTHING WORKS! IT'S AMAZING!
 	}
 	
 	//get Perspective matrix
@@ -1392,12 +1838,6 @@ public:
 	
 	//get identity matrix (default)
 	static Matrix4x4 Identity;
-	
-	static Matrix4x4 getIdentityMatrix()
-	{
-		Matrix4x4 mat;
-		return mat;
-	}
 	
 	static Matrix4x4 LookAt(Vector3 position, Vector3 target, Vector3 upDirection)
 	{
@@ -1463,6 +1903,7 @@ private:
 	
 	bool mipMaps = true;
 	int flags = 0;
+	bool loaded = false;
 	
 	void setParams()
 	{
@@ -1546,12 +1987,16 @@ public:
 	{
 		imageO = SOIL_load_image(filePath, &width, &height, 0, SOIL_LOAD_RGB);
 		isAlpha = false;
+		//flags = 2;
+		loaded = true;
 	}
 	
 	void createTex(const char *filePath, bool alpha)
 	{
 		imageO = SOIL_load_image(filePath, &width, &height, 0, SOIL_LOAD_RGBA);
 		isAlpha = alpha;
+		//flags = 2;
+		loaded = true;
 	}
 	
 	void BindTexture(int id, GLuint *textureID)
@@ -1579,6 +2024,8 @@ public:
 			
 			//glGenerateMipmap(GL_TEXTURE_2D);
 			this->setMipmap();
+			//flags = 0;
+			//loaded = false;
 			//free(imageO);
 		}
 	}
@@ -1607,10 +2054,10 @@ public:
 	{
 		//glActiveTexture(GL_TEXTURE0);
 		//delete textures
-		//if((flags & 2) == 0)
-		//{
-		free(imageO);
-		//}
+		if(loaded)//flags != 0)
+		{
+			free(imageO);
+		}
 	}
 };
 
@@ -1707,8 +2154,8 @@ public:
 	std::vector<float> tangents;
 	//std::vector<float> bitangents;
 	std::vector<GLuint> indices;
-	int numverts;
-	int numindices;
+	int numverts = 0;
+	int numindices = 0;
 	std::string name;
 	
 	void calculateTangentTriangles(Vector3 edge1, Vector3 edge2, Vector2 deltaUV1, Vector2 deltaUV2)
