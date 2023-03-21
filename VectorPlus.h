@@ -1497,7 +1497,7 @@ public:
 	}
 	
 	//TODO encapsulate
-	void mulMatrix(const Matrix4x4 &obj)
+	/*void mulMatrix(const Matrix4x4 &obj)
 	{
 		Matrix4x4 res;
 		for(int i = 0; i < 4; i++)
@@ -1516,6 +1516,28 @@ public:
 		this->y = res.y;
 		this->z = res.z;
 		this->w = res.w;
+	}*/
+	
+	Matrix4x4 operator*=(const Matrix4x4 &obj)
+	{
+		Matrix4x4 res;
+		for(int i = 0; i < 4; i++)
+		{
+			for(int j = 0; j < 4; j++)
+			{
+				res.pos[i][j] = 0;
+				for(int k = 0; k < 4; k++)
+				{
+					res.pos[i][j] += this->pos[i][k] * obj.pos[k][j];
+				}
+			}
+		}
+		
+		this->x = res.x;
+		this->y = res.y;
+		this->z = res.z;
+		this->w = res.w;
+		return res;
 	}
 	
 	Vector4 operator*(Vector4 const& obj)
@@ -1669,13 +1691,15 @@ public:
 	void Rotate(float &phi, float &theta, float &psi)
 	{
 		Matrix4x4 Yrotation = EulerRotation(phi, theta, psi);
-		this->mulMatrix(Yrotation);
+		//this->mulMatrix(Yrotation);
+		*this *= Yrotation;
 	}
 	
 	void Rotate(Vector3 &AvadaKadabra)
 	{
 		Matrix4x4 Yrotation = EulerRotation(AvadaKadabra.x, AvadaKadabra.y, AvadaKadabra.z);
-		this->mulMatrix(Yrotation);
+		//this->mulMatrix(Yrotation);
+		*this *= Yrotation;
 	}
 	
 	//Get translation
@@ -1732,59 +1756,43 @@ public:
 	void Scale(float sx, float sy, float sz)
 	{
 		Matrix4x4 mat = Matrix4x4::Scalation(sx, sy, sz);
-		this->mulMatrix(mat);
+		//this->mulMatrix(mat);
+		*this *= mat;
 	}
 	
 	//Scale with a vector
 	void Scale(const Vector3 &scalation)
 	{
 		Matrix4x4 mat = Matrix4x4::Scalation(scalation);
-		this->mulMatrix(mat);
+		//this->mulMatrix(mat);
+		*this *= mat;
 	}
 	
 	//Scale with a single float
 	void Scale(const float &scalation)
 	{
 		Matrix4x4 mat = Matrix4x4::Scalation(scalation);
-		this->mulMatrix(mat);
+		//this->mulMatrix(mat);
+		*this *= mat;
 	}
 	
 	//translate this matrix
 	void Translate(float mx, float my, float mz)
 	{
 		Matrix4x4 mat = Matrix4x4::Translation(mx, my, mz);
-		this->mulMatrix(mat);
+		//this->mulMatrix(mat);
+		*this *= mat;
 	}
 	
 	void Translate(const Vector3 &translation)
 	{
 		Matrix4x4 mat = Matrix4x4::Translation(translation);
-		this->mulMatrix(mat);
+		//this->mulMatrix(mat);
+		*this *= mat;
 	}
 	
 	//Get 4x4 float array
-	void toArray(float (&obj)[4][4])
-	{
-		obj[0][0] = this->x.x;
-		obj[0][1] = this->x.y;
-		obj[0][2] = this->x.z;
-		obj[0][3] = this->x.w;
-		
-		obj[1][0] = this->y.x;
-		obj[1][1] = this->y.y;
-		obj[1][2] = this->y.z;
-		obj[1][3] = this->y.w;
-		
-		obj[2][0] = this->z.x;
-		obj[2][1] = this->z.y;
-		obj[2][2] = this->z.z;
-		obj[2][3] = this->z.w;
-		
-		obj[3][0] = this->w.x;
-		obj[3][1] = this->w.y;
-		obj[3][2] = this->w.z;
-		obj[3][3] = this->w.w;
-	}//AAAAHHHH there's no way to return an array from inside class without defining a new array of array //FIXED HAHA
+	//AAAAHHHH there's no way to return an array from inside class without defining a new array of array //FIXED HAHA
 	
 	float* toArray()
 	{
@@ -1850,7 +1858,8 @@ public:
 		lookMatrix.x = rightV;
 		lookMatrix.y = upV;
 		lookMatrix.z = Zdirection;
-		lookMatrix.mulMatrix(Matrix4x4::Translation(position));
+		//lookMatrix.mulMatrix(Matrix4x4::Translation(position));
+		lookMatrix *= Matrix4x4::Translation(position);
 		
 		return lookMatrix;
 	}
