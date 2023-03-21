@@ -954,7 +954,7 @@ public:
 	
 	//OVERLOADING operator
 	
-	float& operator[](int i)
+	/*float& operator[](int i)
 	{
 		if(i < 4 && i > -1)
 		{
@@ -964,7 +964,7 @@ public:
 		{
 			return this->pos[0];
 		}
-	}
+	}*/
 	
 	//VECTOR4
 	Vector4 operator+(Vector4 const& obj)
@@ -1365,13 +1365,6 @@ protected:
 	//col row
 public:
 	float pos[4][4] = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
-	//Vector4 pos[4] = {Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0), Vector4(0, 0, 1, 0), Vector4(0, 0, 0, 1)};
-	//pos = {Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0), Vector4(0, 0, 1, 0), Vector4(0, 0, 0, 1)};
-	
-	/*Vector4 &x = this->pos[0];
-	Vector4 &y = this->pos[1];
-	Vector4 &z = this->pos[2];
-	Vector4 &w = this->pos[3];*/
 	
 	Sub4 x = Sub4(this->pos[0]);
 	Sub4 y = Sub4(this->pos[1]);
@@ -1405,21 +1398,7 @@ public:
 	Matrix4x4()
 	{
 		//identity matrix
-		//x = Vector4();
 	}
-	
-	//this does [][]
-	/*Vector4 operator[](int i) const
-	{
-		if(i < 4 && i >= 0)
-		{
-			return this->pos[i];
-		}
-		else
-		{
-			return this->pos[0];
-		}
-	}*/
 	
 	Matrix4x4 operator+(Matrix4x4 const& obj)
 	{
@@ -1496,28 +1475,6 @@ public:
 		return res;
 	}
 	
-	//TODO encapsulate
-	/*void mulMatrix(const Matrix4x4 &obj)
-	{
-		Matrix4x4 res;
-		for(int i = 0; i < 4; i++)
-		{
-			for(int j = 0; j < 4; j++)
-			{
-				res.pos[i][j] = 0;
-				for(int k = 0; k < 4; k++)
-				{
-					res.pos[i][j] += this->pos[i][k] * obj.pos[k][j];
-				}
-			}
-		}
-		
-		this->x = res.x;
-		this->y = res.y;
-		this->z = res.z;
-		this->w = res.w;
-	}*/
-	
 	Matrix4x4 operator*=(const Matrix4x4 &obj)
 	{
 		Matrix4x4 res;
@@ -1576,29 +1533,10 @@ public:
 	
 	void operator=(const float (&obj)[4][4])
 	{
-		//this->x.x = obj[0][0];
-		//this->x.y = obj[0][1];
-		//this->x.z = obj[0][2];
-		//this->x.w = obj[0][3];
 		this->x = obj[0];
 		this->y = obj[1];
 		this->z = obj[2];
 		this->w = obj[3];
-		
-// 		this->y.x = obj[1][0];
-// 		this->y.y = obj[1][1];
-// 		this->y.z = obj[1][2];
-// 		this->y.w = obj[1][3];
-// 		
-// 		this->z.x = obj[2][0];
-// 		this->z.y = obj[2][1];
-// 		this->z.z = obj[2][2];
-// 		this->z.w = obj[2][3];
-// 		
-// 		this->w.x = obj[3][0];
-// 		this->w.y = obj[3][1];
-// 		this->w.z = obj[3][2];
-// 		this->w.w = obj[3][3];
 	}
 	
 	static Matrix4x4 Euler(float phi, float theta, float psi)
@@ -1681,24 +1619,16 @@ public:
 		return QuaternionRotation(Vector3(rx, ry, rz));
 	}
 	
-	/*static Matrix4x4 QuaternionEuler(Vector3 quato)
-	{
-		
-		Matrix4x4 qRotation = QuaternionRotation();
-	}*/
-	
 	//Euler 3 fields
 	void Rotate(float &phi, float &theta, float &psi)
 	{
 		Matrix4x4 Yrotation = EulerRotation(phi, theta, psi);
-		//this->mulMatrix(Yrotation);
 		*this *= Yrotation;
 	}
 	
 	void Rotate(Vector3 &AvadaKadabra)
 	{
 		Matrix4x4 Yrotation = EulerRotation(AvadaKadabra.x, AvadaKadabra.y, AvadaKadabra.z);
-		//this->mulMatrix(Yrotation);
 		*this *= Yrotation;
 	}
 	
@@ -1756,7 +1686,6 @@ public:
 	void Scale(float sx, float sy, float sz)
 	{
 		Matrix4x4 mat = Matrix4x4::Scalation(sx, sy, sz);
-		//this->mulMatrix(mat);
 		*this *= mat;
 	}
 	
@@ -1764,7 +1693,6 @@ public:
 	void Scale(const Vector3 &scalation)
 	{
 		Matrix4x4 mat = Matrix4x4::Scalation(scalation);
-		//this->mulMatrix(mat);
 		*this *= mat;
 	}
 	
@@ -1772,7 +1700,6 @@ public:
 	void Scale(const float &scalation)
 	{
 		Matrix4x4 mat = Matrix4x4::Scalation(scalation);
-		//this->mulMatrix(mat);
 		*this *= mat;
 	}
 	
@@ -1780,14 +1707,12 @@ public:
 	void Translate(float mx, float my, float mz)
 	{
 		Matrix4x4 mat = Matrix4x4::Translation(mx, my, mz);
-		//this->mulMatrix(mat);
 		*this *= mat;
 	}
 	
 	void Translate(const Vector3 &translation)
 	{
 		Matrix4x4 mat = Matrix4x4::Translation(translation);
-		//this->mulMatrix(mat);
 		*this *= mat;
 	}
 	
@@ -1858,7 +1783,6 @@ public:
 		lookMatrix.x = rightV;
 		lookMatrix.y = upV;
 		lookMatrix.z = Zdirection;
-		//lookMatrix.mulMatrix(Matrix4x4::Translation(position));
 		lookMatrix *= Matrix4x4::Translation(position);
 		
 		return lookMatrix;
@@ -1872,11 +1796,6 @@ public:
 		//Z positive
 		return (Irotation * res);
 	}
-	
-	/*~Matrix4x4()
-	{
-		delete pos;
-	}*/
 };
 
 Matrix4x4 Matrix4x4::Identity = Matrix4x4();
