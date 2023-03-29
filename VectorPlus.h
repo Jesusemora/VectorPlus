@@ -280,6 +280,12 @@ public:
 		this->z = why.z;
 	}
 	
+	Vector3(const Vector3 &vx, const Vector3 &vy, const Vector3 &vz)//TODO might have to move this down
+	{
+		*this = Vector3::Lerp(vx, vy);
+		*this = Vector3::Lerp(*this, vz);
+	}
+	
 	//OVERLOADING operator
 	//VECTOR3
 	Vector3 operator+(Vector3 const& obj)
@@ -2063,6 +2069,7 @@ public:
 	float RMatrix[4][4];
 };
 
+//template <typename T>;
 class Component {
 	
 };
@@ -2144,7 +2151,7 @@ public:
 	
 	void GetTangents()
 	{
-		std::cout << "debug" << std::endl;
+		//std::cout << "debug" << std::endl;
 		std::vector<Vector3> uTangents;
 		
 		for(int abc = 0; abc < this->numindices; abc+= 3)
@@ -2183,6 +2190,20 @@ public:
 		//std::cout << "uTangents " << uTangents.size() << " nTangents " << nTangents.size() << " " << this->debug() << std::endl;
 	}
 	
+	void RecalculateNormals()
+	{
+		//first clear normals
+		this->normals.clear();
+		this->normals = std::vector<float>(this->vertices.size());//assign zero //hopefully
+		//TODO finish
+		for(int abc = 0; abc < this->numindices; abc+= 3)
+		{
+			Vector3 v0(this->vertices[this->indices[abc] * 3], this->vertices[this->indices[abc] * 3 + 1], this->vertices[this->indices[abc] * 3 + 2]);
+			Vector3 v1(this->vertices[this->indices[abc + 1] * 3], this->vertices[this->indices[abc + 1] * 3 + 1], this->vertices[this->indices[abc + 1] * 3 + 2]);
+			Vector3 v2(this->vertices[this->indices[abc + 2] * 3], this->vertices[this->indices[abc + 2] * 3 + 1], this->vertices[this->indices[abc + 2] * 3 + 2]);
+		}
+	}
+	
 	std::string debug()
 	{
 		/*for(int aec : this->indices)
@@ -2202,6 +2223,99 @@ public:
 	std::vector<int> indices;
 	int numverts;
 	std::string name;
+};
+
+//TODO Incomplete
+//TODO Test
+class Terrain2D : public Mesh{
+private:
+	//this in constructor
+	void GenerateTerrain()
+	{
+		//generate vertices uvs
+		for(int x = 0; x < voxelwidth+1; x++)
+		{
+			for(int y = 0; y < voxelheight+1; y++)
+			{
+				this->vertices.push_back(x);
+				this->vertices.push_back(y);
+				this->vertices.push_back(0);
+				this->uvs.push_back(x);
+				this->uvs.push_back(y);
+			}
+		}
+		
+		int shix = voxelwidth + 1;
+		//int shiy = voxelheight + 1;
+		int ab1 = 0;
+		int ae1 = 0;
+		int v0 = 0;
+		int v1 = 0;
+		int v2 = 0;
+		int v3 = 0;
+		int shi1 = 0;
+		int shi2 = 0;
+		
+		for(int abc = 0; abc < voxelwidth; abc++)
+		{
+				ab1 = abc + 1;
+			for(int aec = 0; aec < voxelheight; aec++)
+			{
+				ae1 = aec + 1;
+				shi1 = aec * shix;
+				shi2 = ae1 * shix;
+				v0 = abc + (shi1);
+				v1 = ab1 + (shi1);
+				v2 = abc + (shi2);
+				v3 = ab1 + (shi2);
+				this->indices.push_back(v0);
+				this->indices.push_back(v3);
+				this->indices.push_back(v2);
+				this->indices.push_back(v0);
+				this->indices.push_back(v1);
+				this->indices.push_back(v3);//hope this works
+				//FIXME this still doesn't work
+			}
+		}
+		RecalculateNormals();
+		GetTangents();
+	}
+	
+public:
+	//immutable Mesh preserves the same number of everything at all times
+	//only positions are changed
+	//render using dynamic or static opengl array
+	
+	int *VoxelData;
+	
+	unsigned int voxelwidth;
+	unsigned int voxelheight;
+	
+	Terrain2D(unsigned int wid, unsigned int hei)
+	{
+		voxelwidth = wid;
+		voxelheight = hei;
+		
+		this->numverts = (wid + 1) * (hei + 1);
+		this->numindices = wid * hei * 6;
+		
+		VoxelData = new int[wid * hei];
+		
+		GenerateTerrain();
+	}
+	
+	void EditHeight(const unsigned int &x, const unsigned int &y, const float &h)
+	{
+		if(x < voxelwidth && y < voxelheight)
+		{
+			this->vertices[((x + (y * voxelwidth) + 1) * 3) - 1] = h;
+		}
+	}
+	
+	~Terrain2D()
+	{
+		delete[] VoxelData;
+	}
 };
 
 class UI_Transform
