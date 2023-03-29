@@ -7,6 +7,7 @@ This library was created as I was making my own game engine, then it grew in siz
 
 ## Prerequisites
 C++ 11
+
 This library contains a class that uses the SOIL library for loading textures, so it must be included in the compiler flags. I might separate the Texture class into a different file in the future. 
 
 ## Installation
