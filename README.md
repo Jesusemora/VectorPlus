@@ -6,6 +6,7 @@ Vector Plus is a c++ header library for use with opengl. it is meant to provide 
 This library was created as I was making my own game engine, then it grew in size and I thought about using GitHub to keep a list of changes made to the file. I'm continuing to make said game engine, so the library should continue to grow and work with no issues.
 
 ## Prerequisites
+C++ 11
 This library contains a class that uses the SOIL library for loading textures, so it must be included in the compiler flags. I might separate the Texture class into a different file in the future. 
 
 ## Installation
