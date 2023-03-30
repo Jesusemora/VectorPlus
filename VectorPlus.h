@@ -473,6 +473,11 @@ public:
 		return (a + b) * c;
 	}
 	
+	static Vector3 Lerp(Vector3 a, Vector3 b, Vector3 c)
+	{
+		return (a + b + c) / 3;//this or Lerp Lerp for float accuracy
+	}
+	
 	static Vector3 Slerp(Vector3 a, Vector3 b, float c)
 	{
 		return (a + b) * std::sin(HALFPI * c);//TODO make correct geometrical Slerp //so far this is just cosmetic, to get a smooth transition for camera or objects
@@ -2080,6 +2085,24 @@ public:
 	float weight;
 };
 
+class TriNormal {
+public:
+	int indices[3] = {0, 1, 2};
+	Vector3 normal;
+	
+	TriNormal()
+	{
+		
+	}
+	
+	TriNormal(const int &x, const int &y, const int &z, const Vector3 &v0) : normal(v0)
+	{
+		this->indices[0] = x;
+		this->indices[1] = y;
+		this->indices[2] = z;
+	}
+};
+
 class Mesh {
 private:
 public:
@@ -2194,13 +2217,60 @@ public:
 	{
 		//first clear normals
 		this->normals.clear();
-		this->normals = std::vector<float>(this->vertices.size());//assign zero //hopefully
+		//this->normals = std::vector<float>(this->vertices.size());//assign zero //hopefully
+		CalculateNormals();
+	}
+	
+	void CalculateNormals()
+	{
+		std::vector<TriNormal> tempNormals;
 		//TODO finish
 		for(int abc = 0; abc < this->numindices; abc+= 3)
 		{
 			Vector3 v0(this->vertices[this->indices[abc] * 3], this->vertices[this->indices[abc] * 3 + 1], this->vertices[this->indices[abc] * 3 + 2]);
 			Vector3 v1(this->vertices[this->indices[abc + 1] * 3], this->vertices[this->indices[abc + 1] * 3 + 1], this->vertices[this->indices[abc + 1] * 3 + 2]);
 			Vector3 v2(this->vertices[this->indices[abc + 2] * 3], this->vertices[this->indices[abc + 2] * 3 + 1], this->vertices[this->indices[abc + 2] * 3 + 2]);
+			
+			tempNormals.push_back(TriNormal(this->indices[abc], this->indices[abc + 1], this->indices[abc + 2], Vector3::Cross(v1 - v0, v2 - v0)));
+		}
+		
+		std::vector<Vector3> nNormals(this->vertices.size() / 3);
+		
+		for(int aec = 0; aec < tempNormals.size(); aec++)
+		{
+			if(nNormals[tempNormals[aec].indices[0]] == Vector3::zero)
+			{
+				nNormals[tempNormals[aec].indices[0]] = tempNormals[aec].normal;
+			}
+			else
+			{
+				nNormals[tempNormals[aec].indices[0]] = Vector3::Lerp(nNormals[tempNormals[aec].indices[0]], tempNormals[aec].normal);
+			}
+			
+			if(nNormals[tempNormals[aec].indices[1]] == Vector3::zero)
+			{
+				nNormals[tempNormals[aec].indices[1]] = tempNormals[aec].normal;
+			}
+			else
+			{
+				nNormals[tempNormals[aec].indices[1]] = Vector3::Lerp(nNormals[tempNormals[aec].indices[1]], tempNormals[aec].normal);
+			}
+			
+			if(nNormals[tempNormals[aec].indices[2]] == Vector3::zero)
+			{
+				nNormals[tempNormals[aec].indices[2]] = tempNormals[aec].normal;
+			}
+			else
+			{
+				nNormals[tempNormals[aec].indices[2]] = Vector3::Lerp(nNormals[tempNormals[aec].indices[2]], tempNormals[aec].normal);
+			}
+		}
+		
+		for(auto &ch : nNormals)
+		{
+			this->normals.push_back(ch.x);
+			this->normals.push_back(ch.y);
+			this->normals.push_back(ch.z);
 		}
 	}
 	
