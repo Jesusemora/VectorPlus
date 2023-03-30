@@ -30,3 +30,5 @@ Just download the file VectorPlus.h and include it in your program
 **Skybox**:*work in progress*
 
 **Mesh**: Can store a simple mesh, supports normals, uvs, tangents and indices.
+
+**Terrain2D**: Derived from Mesh. Stores a simple mesh and a matrix of int. For use in terrain generation and terrain editing. Can generate an *n* by *n* flat terrain. Editing of terrain is done one vertex at a time or through editing of public variables `vertices` and `uvs`.
