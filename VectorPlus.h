@@ -729,20 +729,20 @@ public:
 		return static_cast<float>(std::sqrt(this->Magnitude()));//must be non negative
 	}
 	
-	void Normalize()
+	/*void Normalize()//this is probably useless
 	{
 		float mag = this->sqrMagnitude();
 		this->x = this->x / mag;
-		this->y = this->y / mag;
+		this->y = this->y / mag;//found error : assigning float to int / conversion must be made but / values are unit so result will be 0 or 1 / completely useless
 		//this->z = this->z / mag;
-	}
+	}*/
 	
-	Vector2Int normalized()
+	Vector2 normalized()//normalized vector useless //result is unit vector / fix: return Vector2 instead
 	{
-		Vector2Int res(0, 0);
+		Vector2 res(0, 0);
 		float mag = this->sqrMagnitude();
-		res.x = std::round(this->x / mag);
-		res.y = std::round(this->y / mag);
+		res.x = this->x / mag;//std::round(this->x / mag);
+		res.y = this->y / mag;//std::round(this->y / mag);
 		return res;
 	}
 	//operator float() const { return x.magnitude;}
@@ -761,7 +761,7 @@ public:
 	
 	//angle
 	//clampmagnitude
-	static float fastDistance(Vector2Int a, Vector2Int b)
+	static int fastDistance(Vector2Int a, Vector2Int b)
 	{
 		return std::abs((a.x + a.y) - (b.x + b.y));
 	}
