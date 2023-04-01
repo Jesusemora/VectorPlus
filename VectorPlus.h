@@ -1094,14 +1094,7 @@ public:
 	
 	bool operator==(const Vector4 & obj) const
 	{
-		if(this->x == obj.x && this->y == obj.y && this->z == obj.z && this->w == obj.w)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return (this->x == obj.x && this->y == obj.y && this->z == obj.z && this->w == obj.w);
 	}
 	
 	void operator=(const Vector4 & obj)
@@ -1139,6 +1132,7 @@ public:
 		return *this;
 	}
 	
+	//TODO remove // DEPRECATED //inefficient
 	void toArray(float (&obj)[4])
 	{
 		obj[0] = this->x;
@@ -1305,6 +1299,7 @@ public:
 	
 	Quaternion operator*=(const Quaternion & obj) const
 	{
+		//FIXME posible problem //TODO test
 		this->x = this->w * obj.x + this->x * obj.w + this->y * obj.z - this->z * obj.y;
 		this->y = this->w * obj.y + this->y * obj.w + this->z * obj.x - this->x * obj.z;
 		this->z = this->w * obj.z + this->z * obj.w + this->x * obj.y - this->y * obj.x;
@@ -1452,8 +1447,9 @@ public:
 	//MATRIX OPERATIONS
 	Matrix4x4 operator*(Matrix4x4 const& obj)
 	{
+		//TODO It might be more efficient to use individual variables to store values than an array and references, but this has to perform the calculations directly
 		Matrix4x4 res;
-		for(int i = 0; i < 4; i++)
+		/*for(int i = 0; i < 4; i++)
 		{
 			for(int j = 0; j < 4; j++)
 			{
@@ -1463,7 +1459,28 @@ public:
 					res.pos[i][j] += this->pos[i][k] * obj.pos[k][j];
 				}
 			}
-		}
+		}*/
+		//TODO cuadruple check
+		//(7 + (0)) calculations vs (12 + (16 * 4))
+		res.x.x = this->x.x * obj.x.x + this->x.y * obj.y.x + this->x.z * obj.z.x + this->x.w * obj.w.x;
+		res.x.y = this->x.x * obj.x.y + this->x.y * obj.y.y + this->x.z * obj.z.y + this->x.w * obj.w.y;
+		res.x.z = this->x.x * obj.x.z + this->x.y * obj.y.z + this->x.z * obj.z.z + this->x.w * obj.w.z;
+		res.x.w = this->x.x * obj.x.w + this->x.y * obj.y.w + this->x.z * obj.z.w + this->x.w * obj.w.w;
+		
+		res.y.x = this->y.x * obj.x.x + this->y.y * obj.y.x + this->y.z * obj.z.x + this->y.w * obj.w.x;
+		res.y.y = this->y.x * obj.x.y + this->y.y * obj.y.y + this->y.z * obj.z.y + this->y.w * obj.w.y;
+		res.y.z = this->y.x * obj.x.z + this->y.y * obj.y.z + this->y.z * obj.z.z + this->y.w * obj.w.z;
+		res.y.w = this->y.x * obj.x.w + this->y.y * obj.y.w + this->y.z * obj.z.w + this->y.w * obj.w.w;
+		
+		res.z.x = this->z.x * obj.x.x + this->z.y * obj.y.x + this->z.z * obj.z.x + this->z.w * obj.w.x;
+		res.z.y = this->z.x * obj.x.y + this->z.y * obj.y.y + this->z.z * obj.z.y + this->z.w * obj.w.y;
+		res.z.z = this->z.x * obj.x.z + this->z.y * obj.y.z + this->z.z * obj.z.z + this->z.w * obj.w.z;
+		res.z.w = this->z.x * obj.x.w + this->z.y * obj.y.w + this->z.z * obj.z.w + this->z.w * obj.w.w;
+		
+		res.w.x = this->w.x * obj.x.x + this->w.y * obj.y.x + this->w.z * obj.z.x + this->w.w * obj.w.x;
+		res.w.y = this->w.x * obj.x.y + this->w.y * obj.y.y + this->w.z * obj.z.y + this->w.w * obj.w.y;
+		res.w.z = this->w.x * obj.x.z + this->w.y * obj.y.z + this->w.z * obj.z.z + this->w.w * obj.w.z;
+		res.w.w = this->w.x * obj.x.w + this->w.y * obj.y.w + this->w.z * obj.z.w + this->w.w * obj.w.w;
 		
 		return res;
 	}
@@ -1471,7 +1488,7 @@ public:
 	Matrix4x4 operator*(float (&obj)[4][4])
 	{
 		Matrix4x4 res;
-		for(int i = 0; i < 4; i++)
+		/*for(int i = 0; i < 4; i++)
 		{
 			for(int j = 0; j < 4; j++)
 			{
@@ -1481,7 +1498,27 @@ public:
 					res.pos[i][j] += this->pos[i][k] * obj[k][j];
 				}
 			}
-		}
+		}*/
+		
+		res.x.x = this->x.x * obj[0][0] + this->x.y * obj[1][0] + this->x.z * obj[2][0] + this->x.w * obj[3][0];
+		res.x.y = this->x.x * obj[0][1] + this->x.y * obj[1][1] + this->x.z * obj[2][1] + this->x.w * obj[3][1];
+		res.x.z = this->x.x * obj[0][2] + this->x.y * obj[1][2] + this->x.z * obj[2][2] + this->x.w * obj[3][2];
+		res.x.w = this->x.x * obj[0][3] + this->x.y * obj[1][3] + this->x.z * obj[2][3] + this->x.w * obj[3][3];
+		
+		res.y.x = this->y.x * obj[0][0] + this->y.y * obj[1][0] + this->y.z * obj[2][0] + this->y.w * obj[3][0];
+		res.y.y = this->y.x * obj[0][1] + this->y.y * obj[1][1] + this->y.z * obj[2][1] + this->y.w * obj[3][1];
+		res.y.z = this->y.x * obj[0][2] + this->y.y * obj[1][2] + this->y.z * obj[2][2] + this->y.w * obj[3][2];
+		res.y.w = this->y.x * obj[0][3] + this->y.y * obj[1][3] + this->y.z * obj[2][3] + this->y.w * obj[3][3];
+		
+		res.z.x = this->z.x * obj[0][0] + this->z.y * obj[1][0] + this->z.z * obj[2][0] + this->z.w * obj[3][0];
+		res.z.y = this->z.x * obj[0][1] + this->z.y * obj[1][1] + this->z.z * obj[2][1] + this->z.w * obj[3][1];
+		res.z.z = this->z.x * obj[0][2] + this->z.y * obj[1][2] + this->z.z * obj[2][2] + this->z.w * obj[3][2];
+		res.z.w = this->z.x * obj[0][3] + this->z.y * obj[1][3] + this->z.z * obj[2][3] + this->z.w * obj[3][3];
+		
+		res.w.x = this->w.x * obj[0][0] + this->w.y * obj[1][0] + this->w.z * obj[2][0] + this->w.w * obj[3][0];
+		res.w.y = this->w.x * obj[0][1] + this->w.y * obj[1][1] + this->w.z * obj[2][1] + this->w.w * obj[3][1];
+		res.w.z = this->w.x * obj[0][2] + this->w.y * obj[1][2] + this->w.z * obj[2][2] + this->w.w * obj[3][2];
+		res.w.w = this->w.x * obj[0][3] + this->w.y * obj[1][3] + this->w.z * obj[2][3] + this->w.w * obj[3][3];
 		
 		return res;
 	}
@@ -1489,7 +1526,7 @@ public:
 	Matrix4x4 operator*=(const Matrix4x4 &obj)
 	{
 		Matrix4x4 res;
-		for(int i = 0; i < 4; i++)
+		/*for(int i = 0; i < 4; i++)
 		{
 			for(int j = 0; j < 4; j++)
 			{
@@ -1499,7 +1536,27 @@ public:
 					res.pos[i][j] += this->pos[i][k] * obj.pos[k][j];
 				}
 			}
-		}
+		}*/
+		
+		res.x.x = this->x.x * obj.x.x + this->x.y * obj.y.x + this->x.z * obj.z.x + this->x.w * obj.w.x;
+		res.x.y = this->x.x * obj.x.y + this->x.y * obj.y.y + this->x.z * obj.z.y + this->x.w * obj.w.y;
+		res.x.z = this->x.x * obj.x.z + this->x.y * obj.y.z + this->x.z * obj.z.z + this->x.w * obj.w.z;
+		res.x.w = this->x.x * obj.x.w + this->x.y * obj.y.w + this->x.z * obj.z.w + this->x.w * obj.w.w;
+		
+		res.y.x = this->y.x * obj.x.x + this->y.y * obj.y.x + this->y.z * obj.z.x + this->y.w * obj.w.x;
+		res.y.y = this->y.x * obj.x.y + this->y.y * obj.y.y + this->y.z * obj.z.y + this->y.w * obj.w.y;
+		res.y.z = this->y.x * obj.x.z + this->y.y * obj.y.z + this->y.z * obj.z.z + this->y.w * obj.w.z;
+		res.y.w = this->y.x * obj.x.w + this->y.y * obj.y.w + this->y.z * obj.z.w + this->y.w * obj.w.w;
+		
+		res.z.x = this->z.x * obj.x.x + this->z.y * obj.y.x + this->z.z * obj.z.x + this->z.w * obj.w.x;
+		res.z.y = this->z.x * obj.x.y + this->z.y * obj.y.y + this->z.z * obj.z.y + this->z.w * obj.w.y;
+		res.z.z = this->z.x * obj.x.z + this->z.y * obj.y.z + this->z.z * obj.z.z + this->z.w * obj.w.z;
+		res.z.w = this->z.x * obj.x.w + this->z.y * obj.y.w + this->z.z * obj.z.w + this->z.w * obj.w.w;
+		
+		res.w.x = this->w.x * obj.x.x + this->w.y * obj.y.x + this->w.z * obj.z.x + this->w.w * obj.w.x;
+		res.w.y = this->w.x * obj.x.y + this->w.y * obj.y.y + this->w.z * obj.z.y + this->w.w * obj.w.y;
+		res.w.z = this->w.x * obj.x.z + this->w.y * obj.y.z + this->w.z * obj.z.z + this->w.w * obj.w.z;
+		res.w.w = this->w.x * obj.x.w + this->w.y * obj.y.w + this->w.z * obj.z.w + this->w.w * obj.w.w;
 		
 		this->x = res.x;
 		this->y = res.y;
@@ -1511,14 +1568,21 @@ public:
 	Vector4 operator*(Vector4 const& obj)
 	{
 		Vector4 res;
-		for(int j = 0; j < 4; j++)
+		/*for(int j = 0; j < 4; j++)
 		{
 			res.pos[j] = 0;
 			for(int k = 0; k < 4; k++)
 			{
 				res.pos[j] += (obj.pos[k] * this->pos[k][j]);
 			}
-		}
+		}*/
+		// 7 * 4 = 28 // 4 * 4 = 16 + (16 * 2) = 48
+		
+		res.x = this->x.x * obj.x + this->y.x * obj.y + this->z.x * obj.z + this->w.x * obj.w;
+		res.y = this->x.y * obj.x + this->y.y * obj.y + this->z.y * obj.z + this->w.y * obj.w;
+		res.z = this->x.z * obj.x + this->y.z * obj.y + this->z.z * obj.z + this->w.z * obj.w;
+		res.w = this->x.w * obj.x + this->y.w * obj.y + this->z.w * obj.z + this->w.w * obj.w;
+		
 		return res;
 	}
 	
@@ -2328,7 +2392,7 @@ private:
 		
 		for(int abc = 0; abc < voxelwidth; abc++)
 		{
-				ab1 = abc + 1;
+			ab1 = abc + 1;
 			for(int aec = 0; aec < voxelheight; aec++)
 			{
 				ae1 = aec + 1;
@@ -2379,6 +2443,14 @@ public:
 		if(x < voxelwidth && y < voxelheight)
 		{
 			this->vertices[((x + (y * voxelwidth) + 1) * 3) - 1] = h;
+		}
+	}
+	
+	void EditHeight(const unsigned int &p, const float &h)
+	{
+		if(p < this->vertices.size())
+		{
+			this->vertices[p] = h;
 		}
 	}
 	
