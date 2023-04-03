@@ -8,10 +8,14 @@ This library was created as I was making my own game engine, then it grew in siz
 ## Prerequisites
 C++ 11
 
-This library contains a class that uses the SOIL library for loading textures, so it must be included in the compiler flags. I might separate the Texture class into a different file in the future. 
+The file TexturePlus.h uses the SOIL library for loading textures into opengl, so it must be included in the compiler flags. This file is optional.
 
 ## Installation
 Just download the file VectorPlus.h and include it in your program
+
+`
+#include "Object/VectorPlus.h"
+`
 
 ## Classes
 
@@ -25,10 +29,12 @@ Just download the file VectorPlus.h and include it in your program
 
 **Matrix4x4**: stores a matrix `float[4][4]`, for use with opengl. can interact with other classes like `Vector4` and `Quaternion`.
 
-**Texture**: RGB or RGBA texture for use in opengl. uses the `SOIL` library for loading images.
-
-**Skybox**:*work in progress*
-
 **Mesh**: Can store a simple mesh, supports normals, uvs, tangents and indices.
 
 **Terrain2D**: Derived from Mesh. Stores a simple mesh and a matrix of int. For use in terrain generation and terrain editing. Can generate an *n* by *n* flat terrain. Editing of terrain is done one vertex at a time or through editing of public variables `vertices` and `uvs`.
+
+#### TexturePlus
+
+**Texture**: RGB or RGBA texture for use in opengl. uses the `SOIL` library for loading images.
+
+**Skybox**:*work in progress*
