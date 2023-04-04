@@ -432,6 +432,13 @@ public:
 	}
 	//operator float() const { return x.magnitude;}
 	
+	void abs()
+	{
+		this->x = std::abs(this->x);
+		this->y = std::abs(this->y);
+		this->z = std::abs(this->z);
+	}
+	
 	static bool Equals(Vector3 a, Vector3 b)
 	{
 		return (a.x == b.x && a.y == b.y && a.z == b.z);
@@ -466,12 +473,17 @@ public:
 	
 	static Vector3 Lerp(Vector3 a, Vector3 b, float c)
 	{
-		return (a + b) * c;
+		return (a * c) + (b * (1 - c));//this prevents multiplying by 0
 	}
 	
 	static Vector3 Lerp(Vector3 a, Vector3 b, Vector3 c)
 	{
 		return (a + b + c) / 3;//this or Lerp Lerp for float accuracy
+	}
+	
+	static Vector3 Slerp(Vector3 a, Vector3 b)
+	{
+		return Vector3::Lerp(a, b, Vector3::Dot(a, b));
 	}
 	
 	static Vector3 Slerp(Vector3 a, Vector3 b, float c)
@@ -1969,6 +1981,8 @@ public:
 		
 		Vector3 tangent = Vector3((edge1.x * deltaUV2.y - edge2.x * deltaUV1.y) * f, (edge1.y * deltaUV2.y - edge2.y * deltaUV1.y) * f, (edge1.z * deltaUV2.y - edge2.z * deltaUV1.y) * f);
 		
+		tangent.Normalize();
+		
 		uTangents.push_back(tangent);
 		uTangents.push_back(tangent);
 		uTangents.push_back(tangent);
@@ -1976,6 +1990,7 @@ public:
 	
 	void GetTangents()
 	{
+		this->tangents.clear();
 		//std::cout << "debug" << std::endl;
 		std::vector<Vector3> uTangents;
 		
@@ -2001,7 +2016,9 @@ public:
 			}
 			else
 			{
-				nTangents[this->indices[ahc]] = Vector3::Lerp(nTangents[this->indices[ahc]], uTangents[ahc]);//mix lerp average blend
+				//nTangents[this->indices[ahc]] = Vector3::Lerp(nTangents[this->indices[ahc]], uTangents[ahc]);//mix lerp average blend
+				//nTangents[this->indices[ahc]] = Vector3(uTangents[ahc]);
+				nTangents[this->indices[ahc]] = Vector3::Slerp(nTangents[this->indices[ahc]], uTangents[ahc]);
 			}
 		}
 		
@@ -2032,7 +2049,7 @@ public:
 			Vector3 v1(this->vertices[this->indices[abc + 1] * 3], this->vertices[this->indices[abc + 1] * 3 + 1], this->vertices[this->indices[abc + 1] * 3 + 2]);
 			Vector3 v2(this->vertices[this->indices[abc + 2] * 3], this->vertices[this->indices[abc + 2] * 3 + 1], this->vertices[this->indices[abc + 2] * 3 + 2]);
 			
-			tempNormals.push_back(TriNormal(this->indices[abc], this->indices[abc + 1], this->indices[abc + 2], Vector3::Cross(v1 - v0, v2 - v0)));
+			tempNormals.push_back(TriNormal(this->indices[abc], this->indices[abc + 1], this->indices[abc + 2], Vector3::Cross(v1 - v0, v2 - v0)));//FIXME bug // this method works for terrain but not for models // terrain has the right orientation but wrong normals
 		}
 		
 		std::vector<Vector3> nNormals(this->vertices.size() / 3);
@@ -2045,7 +2062,7 @@ public:
 			}
 			else
 			{
-				nNormals[tempNormals[aec].indices[0]] = Vector3::Lerp(nNormals[tempNormals[aec].indices[0]], tempNormals[aec].normal);
+				nNormals[tempNormals[aec].indices[0]] = Vector3::Slerp(nNormals[tempNormals[aec].indices[0]], tempNormals[aec].normal);
 			}
 			
 			if(nNormals[tempNormals[aec].indices[1]] == Vector3::zero)
@@ -2054,7 +2071,7 @@ public:
 			}
 			else
 			{
-				nNormals[tempNormals[aec].indices[1]] = Vector3::Lerp(nNormals[tempNormals[aec].indices[1]], tempNormals[aec].normal);
+				nNormals[tempNormals[aec].indices[1]] = Vector3::Slerp(nNormals[tempNormals[aec].indices[1]], tempNormals[aec].normal);
 			}
 			
 			if(nNormals[tempNormals[aec].indices[2]] == Vector3::zero)
@@ -2063,7 +2080,7 @@ public:
 			}
 			else
 			{
-				nNormals[tempNormals[aec].indices[2]] = Vector3::Lerp(nNormals[tempNormals[aec].indices[2]], tempNormals[aec].normal);
+				nNormals[tempNormals[aec].indices[2]] = Vector3::Slerp(nNormals[tempNormals[aec].indices[2]], tempNormals[aec].normal);
 			}
 		}
 		
@@ -2097,12 +2114,14 @@ public:
 };
 
 //TODO Incomplete
-//TODO Test
+//TODO Test //It works //Test height and normal calculation
 class Terrain2D : public Mesh{
 private:
 	//this in constructor
 	void GenerateTerrain()
 	{
+		float wsc = 1.0 / voxelwidth;
+		float hsc = 1.0 / voxelheight;
 		//generate vertices uvs
 		for(int x = 0; x < voxelwidth+1; x++)
 		{
@@ -2110,9 +2129,12 @@ private:
 			{
 				this->vertices.push_back(x);
 				this->vertices.push_back(y);
-				this->vertices.push_back(0);
-				this->uvs.push_back(x);
-				this->uvs.push_back(y);
+				this->vertices.push_back(-1);
+				this->uvs.push_back(x * wsc);
+				this->uvs.push_back(y * hsc);
+				//this->normals.push_back(0);
+				//this->normals.push_back(0);
+				//this->normals.push_back(1);
 			}
 		}
 		
@@ -2140,15 +2162,15 @@ private:
 				v2 = abc + (shi2);
 				v3 = ab1 + (shi2);
 				this->indices.push_back(v0);
-				this->indices.push_back(v3);
+				this->indices.push_back(v1);
 				this->indices.push_back(v2);
-				this->indices.push_back(v0);
+				this->indices.push_back(v2);
 				this->indices.push_back(v1);
 				this->indices.push_back(v3);//hope this works
 				//FIXME this still doesn't work
 			}
 		}
-		RecalculateNormals();
+		CalculateNormals();
 		GetTangents();
 	}
 	
@@ -2179,7 +2201,7 @@ public:
 	{
 		if(x < voxelwidth && y < voxelheight)
 		{
-			this->vertices[((x + (y * voxelwidth) + 1) * 3) - 1] = h;
+			this->vertices[((x + (y * (voxelwidth+1))) * 3) + 2] = h;
 		}
 	}
 	
