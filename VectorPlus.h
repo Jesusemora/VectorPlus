@@ -490,6 +490,16 @@ public:
 	{
 		return (a + b) * std::sin(HALFPI * c);//this is just cosmetic, to get a smooth transition for camera or objects
 	}
+
+	static Vector3 LookAt(Vector3 a, Vector3 b)
+	{
+		return Vector3::Cross(Vector3::Cross(a, b), b);
+	}
+
+	static Vector3 LookAtFromPosition(Vector3 a, Vector3 b, Vector3 c)
+	{
+		return Vector3::LookAt(a - b, c);
+	}
 	
 	//lerp
 	//
@@ -863,6 +873,11 @@ public:
 			this->y /= mag;
 			this->z /= mag;
 		}
+	}
+	
+	void debug()
+	{
+		std::cout << this->x << " " << this->y << " " << this->z << " " << this->w << "\n";
 	}
 };
 
@@ -1253,6 +1268,8 @@ public:
 		this->y = qcosx * qsiny * qcosz;
 		this->z = qcosXY * qsinz;
 		this->w = qcosXY * qcosz;
+		
+		//this->QNormalize();
 	}
 	
 	Quaternion(float xr, float yr, float zr)
@@ -1370,6 +1387,18 @@ public:
 		quato.z = a.z * rA + b.z * rB;
 		//return a * a.inverse * b * c;//(b * a.inverse()) * c * a;
 		return quato;
+	}
+
+	static Quaternion LookAt(Vector3 a, Vector3 b)
+	{
+		Vector3 res(Vector3::LookAt(a, b))
+		Quaternion quato(Vector3(res.x * b.x, res.y * b.y, res.z * b.z));//TODO check
+		return quato;
+	}
+
+	static Quaternion LookAtFromPosition(Vector3 a, Vector3 b, Vector3 c)
+	{
+		return Quaternion::LookAt(a - b, c);
 	}
 };
 
@@ -1570,7 +1599,7 @@ public:
 		this->y = res.y;
 		this->z = res.z;
 		this->w = res.w;
-		return res;
+		return *this;
 	}
 	
 	Vector4 operator*(Vector4 const& obj)
@@ -1608,10 +1637,10 @@ public:
 	
 	void operator=(const Matrix4x4 & obj)
 	{
-		x = obj.x;
-		y = obj.y;
-		z = obj.z;
-		w = obj.w;
+		this->x = obj.x;
+		this->y = obj.y;
+		this->z = obj.z;
+		this->w = obj.w;
 	}
 	
 	void operator=(const float (&obj)[4][4])
@@ -1806,6 +1835,18 @@ public:
 	{
 		return *this->pos;//EVERYTHING WORKS! IT'S AMAZING!
 	}
+	
+	void toArray(std::vector<float> &TArray)
+	{
+		TArray.insert(TArray.end(), std::begin(*this->pos), std::end(*this->pos));//TODO test
+		std::cout << TArray.size() << " " ;
+	}
+	
+	void debug()
+	{
+		std::cout << "matrix4x4 : " << this->x.x << " | " << this->x.y << " | " << this->x.z << " | " << this->x.w << "\n" << this->y.x << " | " << this->y.y << " | " << this->y.z << " | " << this->y.w << "\n" << this->z.x << " | " << this->z.y << " | " << this->z.z << " | " << this->z.w << '\n' << this->w.x << " | " << this->w.y << " | " << this->w.z << " | " << this->w.w << "\n";
+	}
+
 	
 	//get Perspective matrix
 	static Matrix4x4 Perspective(float FOV, float near, float far)
