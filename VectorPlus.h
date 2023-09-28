@@ -498,7 +498,7 @@ public:
 
 	static Vector3 LookAtFromPosition(Vector3 a, Vector3 b, Vector3 c)
 	{
-		return Vector3::LookAt(a - b, c);
+		return Vector3::LookAt((a - b).Normalize(), c);
 	}
 	
 	//lerp
@@ -1392,13 +1392,13 @@ public:
 	static Quaternion LookAt(Vector3 a, Vector3 b)
 	{
 		Vector3 res(Vector3::LookAt(a, b))
-		Quaternion quato(Vector3(res.x * b.x, res.y * b.y, res.z * b.z));//TODO check
+		Quaternion quato(res.x * b.x, res.y * b.y, res.z * b.z);//TODO check
 		return quato;
 	}
 
 	static Quaternion LookAtFromPosition(Vector3 a, Vector3 b, Vector3 c)
 	{
-		return Quaternion::LookAt(a - b, c);
+		return Quaternion::LookAt((a - b).Normalize(), c);
 	}
 };
 
